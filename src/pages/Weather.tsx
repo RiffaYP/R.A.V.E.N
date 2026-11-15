@@ -103,10 +103,19 @@ export default function Weather() {
       `&timezone=auto&forecast_days=7`;
     let alive = true;
     setError(false);
-    fetch(url)
+    const withRetry = (attempt = 0): Promise<Response> =>
+      fetch(url).then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r;
+      }).catch((e) => {
+        if (attempt >= 2) throw e;
+        return new Promise((res) => setTimeout(res, 800 * (attempt + 1))).then(() => withRetry(attempt + 1));
+      });
+    withRetry()
       .then((r) => r.json())
       .then((j) => {
         if (!alive) return;
+        if (!j?.current) throw new Error("bad payload");
         setCur({
           temp: j?.current?.temperature_2m ?? 0,
           code: j?.current?.weather_code ?? 0,

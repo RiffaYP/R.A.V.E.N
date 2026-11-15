@@ -22,10 +22,12 @@ Dibangun dengan **Electron + React + TypeScript**.
 | **Alat** | To-do (dengan pengingat), Clipboard history, Shelf (drag file) |
 | **Sholat** | 6 waktu dihitung offline (tanpa API), pilih kota, penanda waktu berikutnya |
 | **Water** | Ring progres air minum, target 8 gelas, reset harian |
-| **Cuaca** | Open-Meteo (tanpa API key): kondisi kini, strip 12 jam, prakiraan 7 hari |
+| **Cuaca** | Open-Meteo (tanpa API key): kondisi kini, strip 12 jam, prakiraan 7 hari (muat penuh), retry otomatis saat jaringan gagal |
 | **Terjemah** | Terjemahan via Google Gemini, 9 bahasa, toggle transliterasi latin |
 
 ### Perilaku global
+- **Ringan di latar** — data diambil lewat worker PowerShell persisten (satu proses), bukan
+  spawn proses baru tiap poll; lirik tetap sinkron ~500ms.
 - **Idle peek** — notch tertutup bergantian jam ↔ judul lagu.
 - **Raven mascot** — mata SVG ber-glow saat idle (bisa dimatikan).
 - **Notifikasi transient** — melebar saat charger dicolok / headphone terhubung.

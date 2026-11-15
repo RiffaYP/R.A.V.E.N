@@ -3,6 +3,7 @@ import path from "node:path";
 import { startMediaPolling, mediaCommand, mediaSeek } from "./media";
 import { startSystemPolling } from "./system";
 import { startForegroundPolling } from "./windowstate";
+import { disposeWorkers } from "./ps";
 import { loadSettings, getSettings, saveSettings, scaleFactor } from "./settings";
 import { loadShelf, getShelf, addToShelf, removeFromShelf, clearShelf, openShelfItem, dragShelfItem } from "./shelf";
 
@@ -327,8 +328,8 @@ if (!app.requestSingleInstanceLock()) {
     quitting = true;
     tray?.destroy();
     tray = null;
-  });
-  app.on("window-all-closed", () => {
+    disposeWorkers();
+  });  app.on("window-all-closed", () => {
     if (quitting) app.quit();
   });
 }

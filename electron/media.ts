@@ -1,10 +1,10 @@
-import { execFile } from "node:child_process";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { app } from "electron";
 import { getSettings } from "./settings";
+import { getMediaWorker } from "./ps";
 
 export interface LyricLine {
   t: number;
@@ -36,15 +36,9 @@ interface LrclibResult {
   plainLyrics?: string;
 }
 
-// ponytail: PowerShell+WinRT tiap 500ms. Ganti native addon kalau butuh <50ms.
+// Media read runs inside the persistent PowerShell worker (see ps.ts).
+// Await() and the session-manager type are preloaded there.
 const PS_READ = `
-$ErrorActionPreference='SilentlyContinue'
-Add-Type -AssemblyName System.Runtime.WindowsRuntime
-[void][Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]
-function Await($op, $type){
-  $method=[System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.IsGenericMethod -and $_.GetGenericArguments().Count -eq 1 -and $_.GetParameters().Count -eq 1 } | Select-Object -First 1
-  return $method.MakeGenericMethod($type).Invoke($null,@($op)).GetAwaiter().GetResult()
-}
 $m=Await ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager])
 $current=$m.GetCurrentSession()
 $s=$null
@@ -56,7 +50,7 @@ foreach($candidate in $m.GetSessions()){
 }
 if(-not $s){ $s=$paused }
 if(-not $s){ $s=$current }
-if(-not $s){ '{}'; exit }
+if(-not $s){ '{}' } else {
 $p=Await ($s.TryGetMediaPropertiesAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionMediaProperties])
 $pb=$s.GetPlaybackInfo()
 $tl=$s.GetTimelineProperties()
@@ -67,22 +61,16 @@ $tl=$s.GetTimelineProperties()
   end=$tl.EndTime.TotalMilliseconds
   updated=$tl.LastUpdatedTime.ToUnixTimeMilliseconds()
 } | ConvertTo-Json -Compress
+}
 `;
 
 function readMedia(): Promise<any> {
-  return new Promise((resolve) => {
-    execFile(
-      "powershell.exe",
-      ["-NoProfile", "-NonInteractive", "-EncodedCommand", Buffer.from(PS_READ, "utf16le").toString("base64")],
-      { timeout: 4000, windowsHide: true, maxBuffer: 1024 * 1024 },
-      (_err, stdout) => {
-        try {
-          resolve(JSON.parse(stderrless(stdout)));
-        } catch {
-          resolve({});
-        }
-      }
-    );
+  return getMediaWorker().request(PS_READ, 2000).then((out) => {
+    try {
+      return JSON.parse(stderrless(out));
+    } catch {
+      return {};
+    }
   });
 }
 
@@ -90,14 +78,6 @@ function stderrless(s: string) {
   const t = (s || "").trim();
   const i = t.indexOf("{");
   return i >= 0 ? t.slice(i) : "{}";
-}
-
-function runPowerShell(script: string, timeout = 4000, maxBuffer = 1024 * 1024) {
-  execFile(
-    "powershell.exe",
-    ["-NoProfile", "-NonInteractive", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")],
-    { timeout, windowsHide: true, maxBuffer }
-  );
 }
 
 function psCommand(cmd: "toggle" | "next" | "prev"): string {
@@ -108,10 +88,6 @@ function psCommand(cmd: "toggle" | "next" | "prev"): string {
       ? "$s.TrySkipPreviousAsync()"
       : "$(if([string]$s.GetPlaybackInfo().PlaybackStatus -eq 'Playing'){$s.TryPauseAsync()}else{$s.TryPlayAsync()})";
   return `
-$ErrorActionPreference='SilentlyContinue'
-Add-Type -AssemblyName System.Runtime.WindowsRuntime
-[void][Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]
-function Await($op, $type){ $method=[System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.IsGenericMethod -and $_.GetGenericArguments().Count -eq 1 -and $_.GetParameters().Count -eq 1 } | Select-Object -First 1; return $method.MakeGenericMethod($type).Invoke($null,@($op)).GetAwaiter().GetResult() }
 $m=Await ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager])
 $s=$m.GetCurrentSession()
 if($s){ [void](Await (${action}) ([bool])) }
@@ -119,21 +95,17 @@ if($s){ [void](Await (${action}) ([bool])) }
 }
 
 export function mediaCommand(cmd: "toggle" | "next" | "prev") {
-  runPowerShell(psCommand(cmd));
+  getMediaWorker().request(psCommand(cmd), 2000);
 }
 
 export function mediaSeek(ms: number) {
   const ticks = Math.max(0, Math.round(ms)) * 10000;
   const ps = `
-$ErrorActionPreference='SilentlyContinue'
-Add-Type -AssemblyName System.Runtime.WindowsRuntime
-[void][Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]
-function Await($op, $type){ $method=[System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.IsGenericMethod -and $_.GetGenericArguments().Count -eq 1 -and $_.GetParameters().Count -eq 1 } | Select-Object -First 1; return $method.MakeGenericMethod($type).Invoke($null,@($op)).GetAwaiter().GetResult() }
 $m=Await ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager])
 $s=$m.GetCurrentSession()
 if($s){ [void](Await ($s.TryChangePlaybackPositionAsync([long]${ticks})) ([bool])) }
 `;
-  runPowerShell(ps);
+  getMediaWorker().request(ps, 2000);
 }
 
 interface Cache {

@@ -896,8 +896,9 @@ body,
 .pomo, .tools, .prayer, .weather { padding-top: 0; }
 .clock-page { padding-top: 0; }
 
-/* system: six cards must fit without scrolling */
-.sys { overflow: hidden; max-height: 100%; }
+/* system: six cards should fit; fall back to scroll if a BT device grows a card */
+.sys { overflow-y: auto; max-height: 100%; scrollbar-width: none; }
+.sys::-webkit-scrollbar { display: none; }
 
 /* consistent control sizing across pages */
 .tools-tabs button, .pomo-tabs button { height: 22px; }
