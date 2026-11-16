@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app, safeStorage } from "electron";
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
@@ -39,11 +39,36 @@ function file() {
   return path.join(app.getPath("userData"), "settings.json");
 }
 
+// API key is stored encrypted at rest. Falls back to plaintext only when the OS
+// keychain is unavailable (safeStorage unsupported), so the app still works.
+function encryptKey(plain: string): string {
+  if (!plain) return "";
+  try {
+    if (safeStorage.isEncryptionAvailable()) {
+      return "enc:" + safeStorage.encryptString(plain).toString("base64");
+    }
+  } catch {}
+  return plain;
+}
+
+function decryptKey(stored: string): string {
+  if (!stored) return "";
+  if (stored.startsWith("enc:")) {
+    try {
+      return safeStorage.decryptString(Buffer.from(stored.slice(4), "base64"));
+    } catch {
+      return "";
+    }
+  }
+  return stored;
+}
+
 export function loadSettings(): Settings {
   try {
     const raw = readFileSync(file(), "utf8");
-    const parsed = JSON.parse(raw) as Partial<Settings>;
+    const parsed = JSON.parse(raw) as Partial<Settings> & { geminiKey?: string };
     current = { ...DEFAULTS, ...parsed };
+    current.geminiKey = decryptKey(parsed.geminiKey ?? "");
   } catch {
     current = { ...DEFAULTS };
   }
@@ -57,7 +82,8 @@ export function getSettings(): Settings {
 export function saveSettings(patch: Partial<Settings>): Settings {
   current = { ...current, ...patch };
   try {
-    writeFileSync(file(), JSON.stringify(current, null, 2), "utf8");
+    const onDisk = { ...current, geminiKey: encryptKey(current.geminiKey) };
+    writeFileSync(file(), JSON.stringify(onDisk, null, 2), "utf8");
   } catch {}
   return current;
 }

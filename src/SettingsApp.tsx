@@ -165,7 +165,7 @@ export default function SettingsApp() {
           spellCheck={false}
         />
         <div className="settings-hint">
-          Untuk Terjemah. Gratis dari Google AI Studio. Disimpan lokal di settings.json.
+          Untuk Terjemah. Gratis dari Google AI Studio. Disimpan terenkripsi (Windows) di settings.json.
         </div>
       </section>
 

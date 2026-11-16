@@ -133,20 +133,10 @@ async function fetchCover(title: string, artist: string): Promise<string> {
     return url;
   } catch {}
 
-  const term = encodeURIComponent(`${title} ${artist}`.trim());
-  const search = `https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=1`;
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(search, { signal: controller.signal });
-    clearTimeout(timeout);
-    if (!res.ok) return "";
-    const data = (await res.json()) as {
-      results?: { artworkUrl100?: string }[];
-    };
-    const artwork = data.results?.[0]?.artworkUrl100?.replace("100x100", "600x600");
-    if (!artwork) return "";
+  const artwork = (await itunesArtwork(title, artist)) || (await deezerArtwork(title, artist));
+  if (!artwork) return "";
 
+  try {
     const imageController = new AbortController();
     const imageTimeout = setTimeout(() => imageController.abort(), 7000);
     const image = await fetch(artwork, { signal: imageController.signal });
@@ -158,6 +148,39 @@ async function fetchCover(title: string, artist: string): Promise<string> {
     const url = pathToFileURL(file).href;
     coverCache.set(key, url);
     return url;
+  } catch {
+    return "";
+  }
+}
+
+async function itunesArtwork(title: string, artist: string): Promise<string> {
+  const term = encodeURIComponent(`${title} ${artist}`.trim());
+  const search = `https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=1`;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(search, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) return "";
+    const data = (await res.json()) as { results?: { artworkUrl100?: string }[] };
+    return data.results?.[0]?.artworkUrl100?.replace("100x100", "600x600") ?? "";
+  } catch {
+    return "";
+  }
+}
+
+async function deezerArtwork(title: string, artist: string): Promise<string> {
+  const q = encodeURIComponent(`${title} ${artist}`.trim());
+  const search = `https://api.deezer.com/search?q=${q}&limit=1`;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(search, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) return "";
+    const data = (await res.json()) as { data?: { album?: { cover_xl?: string; cover_big?: string } }[] };
+    const album = data.data?.[0]?.album;
+    return album?.cover_xl || album?.cover_big || "";
   } catch {
     return "";
   }
@@ -267,16 +290,43 @@ async function fetchLyrics(title: string, artist: string, durationMs: number) {
   let results = await searchLyrics(cleanTitle(title), mainArtist);
   if (results.length === 0) results = await searchLyrics(title, artist);
   const exact = pickResult(results, title, artist, durationMs);
-  if (!exact) return { lines: [] as LyricLine[], synced: false };
-  if (exact.syncedLyrics) {
-    return { lines: parseLrc(exact.syncedLyrics), synced: true };
+  if (exact) {
+    if (exact.syncedLyrics) {
+      return { lines: parseLrc(exact.syncedLyrics), synced: true };
+    }
+    const lines = (exact.plainLyrics || "")
+      .split(/\r?\n/)
+      .map((text) => text.trim())
+      .filter(Boolean)
+      .map((text) => ({ t: 0, text }));
+    if (lines.length > 0) return { lines, synced: false };
   }
-  const lines = (exact.plainLyrics || "")
-    .split(/\r?\n/)
-    .map((text) => text.trim())
-    .filter(Boolean)
-    .map((text) => ({ t: 0, text }));
-  return { lines, synced: false };
+
+  // LRCLIB had nothing usable: try lyrics.ovh (plain, no key) so the page shows
+  // something instead of "Lirik tidak tersedia".
+  const plain = await fetchLyricsOvh(cleanTitle(title), mainArtist);
+  if (plain.length > 0) return { lines: plain, synced: false };
+  return { lines: [] as LyricLine[], synced: false };
+}
+
+async function fetchLyricsOvh(title: string, artist: string): Promise<LyricLine[]> {
+  const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) return [];
+    const data = (await res.json()) as { lyrics?: string };
+    return (data.lyrics || "")
+      .split(/\r?\n/)
+      .map((text) => text.trim())
+      .filter(Boolean)
+      .filter((t) => !/^paroles de la chanson/i.test(t))
+      .map((text) => ({ t: 0, text }));
+  } catch {
+    return [];
+  }
 }
 
 export function parseLrc(src: string) {
@@ -304,8 +354,11 @@ export function parseLrc(src: string) {
 export function startMediaPolling(emit: (info: MediaInfo | null) => void) {
   let missed = 0;
   let lastKey = "";
+  let running = false;
 
   const tick = async () => {
+    if (running) return;
+    running = true;
     try {
       const data = await readMedia();
       if (!data.title) {
@@ -371,9 +424,12 @@ export function startMediaPolling(emit: (info: MediaInfo | null) => void) {
       });
     } catch {
     } finally {
-      setTimeout(tick, 500);
+      running = false;
     }
   };
 
+  // Fixed cadence: a slow tick (worker restart, network) no longer pushes the
+  // next poll back, so lyrics stay in step. Overlapping ticks are skipped.
+  setInterval(tick, 500);
   tick();
 }

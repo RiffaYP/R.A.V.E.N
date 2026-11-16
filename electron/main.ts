@@ -19,6 +19,11 @@ let compactState = false;
 const BASE_W = 470;
 const BASE_H = 270;
 
+// 16x16 opaque PNG (purple square + white dot) used only when no icon asset
+// can be loaded, so the tray icon never ends up invisible.
+const FALLBACK_TRAY_PNG =
+  "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAA8SURBVDhPY1jZ+v8/JZgBXYBUPJwNwAbQ1eA0AB9AV0t9AwgBdPUYBhAyBF0tbQzAZQi6GrwGEIuHgQEAG4xRjrquNPkAAAAASUVORK5CYII=";
+
 function notchSize() {
   const s = scaleFactor();
   return { w: Math.round(BASE_W * s), h: Math.round(BASE_H * s) };
@@ -40,8 +45,14 @@ function notchPosition(w: number, h: number) {
 }
 
 function resolveIcon() {
-  const dirs = [path.join(__dirname, "../assets"), path.join(__dirname, "../resources")];
+  const dirs = [
+    path.join(__dirname, "../assets"),
+    path.join(__dirname, "../resources"),
+    path.join(process.resourcesPath || "", "assets"),
+    path.join(process.resourcesPath || "", "app.asar.unpacked", "assets"),
+  ];
   for (const d of dirs) {
+    if (!d) continue;
     for (const f of ["icon.png", "icon.ico"]) {
       const p = path.join(d, f);
       try {
@@ -163,7 +174,12 @@ function createSettingsWindow() {
 
 function createTray() {
   const icon = resolveIcon();
-  tray = new Tray(icon ? icon.resize({ width: 16, height: 16 }) : nativeImage.createEmpty());
+  // Fallback: a 16x16 opaque image keeps the tray icon visible even if asset
+  // loading fails, so the menu (Settings / Quit) stays reachable.
+  const trayIcon = icon
+    ? icon.resize({ width: 16, height: 16 })
+    : nativeImage.createFromBuffer(Buffer.from(FALLBACK_TRAY_PNG, "base64")).resize({ width: 16, height: 16 });
+  tray = new Tray(trayIcon);
   tray.setToolTip("Raven");
   const menu = Menu.buildFromTemplate([
     {
@@ -210,6 +226,39 @@ function applyAutostart(enabled: boolean) {
   try {
     app.setLoginItemSettings({ openAtLogin: enabled });
   } catch {}
+}
+
+// ponytail: plain GitHub Releases check, no auto-download. Fires once per launch,
+// notifies only when a newer tag exists. Upgrade to electron-updater if auto-install desired.
+async function checkForUpdates() {
+  try {
+    const res = await fetch("https://api.github.com/repos/RiffaYP/R.A.V.E.N/releases/latest", {
+      headers: { Accept: "application/vnd.github+json", "User-Agent": "Raven" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return;
+    const data = (await res.json()) as { tag_name?: string };
+    const latest = (data.tag_name || "").replace(/^v/i, "");
+    if (!latest) return;
+    const current = app.getVersion();
+    if (compareVersions(latest, current) > 0 && Notification.isSupported()) {
+      new Notification({
+        title: "Raven versi baru tersedia",
+        body: `v${latest} (kamu v${current}). Buka Releases untuk unduh.`,
+        icon: resolveIcon(),
+      }).show();
+    }
+  } catch {}
+}
+
+function compareVersions(a: string, b: string): number {
+  const pa = a.split(".").map((n) => parseInt(n, 10) || 0);
+  const pb = b.split(".").map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] || 0) - (pb[i] || 0);
+    if (d !== 0) return d < 0 ? -1 : 1;
+  }
+  return 0;
 }
 
 ipcMain.on("media:command", (_e, cmd: "toggle" | "next" | "prev") => mediaCommand(cmd));
@@ -323,6 +372,7 @@ if (!app.requestSingleInstanceLock()) {
     applyAutostart(getSettings().autostart);
     createWindow();
     createTray();
+    setTimeout(() => checkForUpdates(), 5000);
   });
   app.on("before-quit", () => {
     quitting = true;
