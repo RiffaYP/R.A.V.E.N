@@ -53,15 +53,16 @@ function Todos() {
   useEffect(() => {
     const id = window.setInterval(() => {
       const now = Date.now();
-      const dueNow = todos.filter((t) => !t.done && !t.notified && t.due && new Date(t.due).getTime() <= now);
-      if (dueNow.length === 0) return;
-      for (const t of dueNow) window.raven.notifyTodo({ text: t.text, due: new Date(t.due as string).getTime() });
-      setTodos((prev) =>
-        prev.map((t) => (dueNow.some((d) => d.id === t.id) ? { ...t, notified: true } : t))
-      );
+      setTodos((prev) => {
+        const dueNow = prev.filter((t) => !t.done && !t.notified && t.due && new Date(t.due).getTime() <= now);
+        if (dueNow.length === 0) return prev;
+        for (const t of dueNow) window.raven.notifyTodo({ text: t.text, due: new Date(t.due as string).getTime() });
+        const ids = new Set(dueNow.map((d) => d.id));
+        return prev.map((t) => (ids.has(t.id) ? { ...t, notified: true } : t));
+      });
     }, 15000);
     return () => window.clearInterval(id);
-  }, [todos]);
+  }, []);
 
   const add = () => {
     const t = draft.trim();

@@ -42,8 +42,14 @@ export default function Media({ media }: { media: MediaInfo | null }) {
   const lines = media?.lines ?? [];
   const key = media ? `${media.title}|${media.artist}` : "";
 
+  const lastKey = useRef("");
   useEffect(() => {
-    if (media) anchor.current = { pos: media.pos, at: performance.now(), key };
+    if (!media) return;
+    if (lastKey.current !== key) {
+      lastKey.current = key;
+      setScrub(null);
+    }
+    anchor.current = { pos: media.pos, at: performance.now(), key };
   }, [media?.pos, key]);
 
   useEffect(() => {
@@ -72,14 +78,41 @@ export default function Media({ media }: { media: MediaInfo | null }) {
   const visible = synced ? lines.slice(sliceStart, sliceStart + WINDOW) : [];
   const activeLocal = activeIndex - sliceStart;
 
-  const seekFromClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (!duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-    window.raven.seek(ratio * duration);
+  const dragging = useRef(false);
+  const barRef = useRef<HTMLDivElement>(null);
+  const seekTo = (clientX: number, el: HTMLDivElement) => {
+    const rect = el.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
     setScrub(ratio);
-    setTimeout(() => setScrub(null), 600);
+    return ratio;
   };
+  const onDown = (e: MouseEvent<HTMLDivElement>) => {
+    if (!duration) return;
+    dragging.current = true;
+    seekTo(e.clientX, e.currentTarget);
+  };
+  useEffect(() => {
+    if (!duration) return;
+    const move = (e: globalThis.MouseEvent) => {
+      if (!dragging.current || !barRef.current) return;
+      seekTo(e.clientX, barRef.current);
+    };
+    const up = (e: globalThis.MouseEvent) => {
+      if (!dragging.current) return;
+      dragging.current = false;
+      if (barRef.current) {
+        const ratio = seekTo(e.clientX, barRef.current);
+        window.raven.seek(ratio * duration);
+      }
+      setScrub(null);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    return () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    };
+  }, [duration]);
 
   return (
     <div className="page media has-head">
@@ -114,7 +147,7 @@ export default function Media({ media }: { media: MediaInfo | null }) {
       )}
 
       <div className={`bar ${hasMedia ? "" : "off"}`}>
-        <div className="progress-row" onClick={seekFromClick}>
+        <div className="progress-row" ref={barRef} onMouseDown={onDown}>
           <div className="track">
             <div className="fill" style={{ width: `${progress * 100}%` }} />
             <div className="knob" style={{ left: `${progress * 100}%` }} />
