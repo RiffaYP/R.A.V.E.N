@@ -15,7 +15,7 @@ Dibangun dengan **Electron + React + TypeScript**.
 
 | Halaman | Isi |
 |---|---|
-| **Musik** | Cover album, judul/artis, lirik sinkron (LRCLIB), progress + seek, kontrol prev/play/next, background blur dari cover |
+| **Musik** | Cover album (iTunes → Deezer), judul/artis, lirik sinkron (LRCLIB → lyrics.ovh), progress + seek (klik/geser), kontrol prev/play/next, background blur dari cover |
 | **Jam & Kalender** | Jam besar + detik, tanggal Indonesia, kalender bulanan |
 | **Pomodoro** | Ring progres, mode Fokus/Istirahat, durasi atur, jalan lintas halaman |
 | **Sistem** | Baterai & health, WiFi, Bluetooth (status + baterai GATT), Caps Lock, volume, kecerahan |
@@ -33,6 +33,7 @@ Dibangun dengan **Electron + React + TypeScript**.
 - **Notifikasi transient** — melebar saat charger dicolok / headphone terhubung.
 - **Auto-compact** — notch mengecil jadi strip mini saat ada fullscreen sungguhan.
 - **Warna aksen** — preset atau mengikuti warna dominan cover album.
+- **Update check** — cek rilis GitHub sekali saat start; notifikasi bila ada versi baru (tanpa auto-download).
 - **Tema mono gelap** dengan skala UI yang bisa diatur.
 
 ---
@@ -59,9 +60,11 @@ Klik kanan notch = keluar. Klik kanan tray = menu.
 ## Stack
 
 - Electron 33 · React 19 · TypeScript 5.7 · Vite 6 · electron-builder 25
-- Data: GSMTC (media), CIM/WinRT (sistem), Open-Meteo (cuaca), LRCLIB (lirik),
-  iTunes (cover), Gemini (terjemah), perhitungan astronomi offline (sholat).
-- Semua kredensial lokal (API key Gemini) disimpan di `settings.json` user data.
+- Data: GSMTC (media), CIM/WinRT (sistem), Open-Meteo (cuaca), LRCLIB → lyrics.ovh (lirik),
+  iTunes → Deezer (cover), Gemini (terjemah), GitHub Releases (update check),
+  perhitungan astronomi offline (sholat).
+- Kredensial (API key Gemini) disimpan **terenkripsi** via `safeStorage` di `settings.json`
+  user data (fallback plaintext hanya bila OS keychain tak tersedia).
 
 ---
 
