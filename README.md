@@ -26,7 +26,7 @@ Dibangun dengan **Electron + React + TypeScript**.
 | **Terjemah** | Terjemahan via Google Gemini, 9 bahasa, toggle transliterasi latin |
 
 ### Perilaku global
-- **Closed state hidup (Dynamic Island style)** — notch tertutup menampilkan progress arc baterai/air (SVG), breathing pulse saat Pomodoro aktif, dan mini audio visualizer 3 batang saat musik memutar.
+- **Closed state hidup (Dynamic Island style)** — notch tertutup menampilkan breathing pulse saat Pomodoro aktif, dan mini audio visualizer 3 batang saat musik memutar.
 - **Ringan di latar** — data diambil lewat worker PowerShell persisten (satu proses), bukan
   spawn proses baru tiap poll; lirik tetap sinkron ~500ms.
 - **Idle peek** — notch tertutup bergantian jam ↔ judul lagu.

@@ -350,6 +350,11 @@ function broadcastMascot() {
   win.webContents.send("settings:mascot", getSettings().mascot);
 }
 
+function broadcastTheme() {
+  if (!win || win.isDestroyed()) return;
+  win.webContents.send("settings:theme", getSettings().theme);
+}
+
 ipcMain.handle("settings:set", (_e, patch: Record<string, unknown>) => {
   if ("scale" in patch || "monitor" in patch) patch.x = null;
   const s = saveSettings(patch);
@@ -359,6 +364,7 @@ ipcMain.handle("settings:set", (_e, patch: Record<string, unknown>) => {
   if ("accentMode" in patch || "accentColor" in patch) broadcastAccent();
   if ("hour24" in patch) broadcastHour24();
   if ("mascot" in patch) broadcastMascot();
+  if ("theme" in patch) broadcastTheme();
   return s;
 });
 

@@ -4,6 +4,7 @@ import path from "node:path";
 
 export type AccentMode = "preset" | "cover";
 export type AccentColor = "white" | "blue" | "purple" | "green" | "orange" | "pink";
+export type ThemePreset = "oled" | "slate" | "violet" | "frosted";
 
 export interface Settings {
   scale: number;
@@ -17,6 +18,7 @@ export interface Settings {
   geminiKey: string;
   hour24: boolean;
   mascot: boolean;
+  theme: ThemePreset;
 }
 
 const DEFAULTS: Settings = {
@@ -31,6 +33,7 @@ const DEFAULTS: Settings = {
   geminiKey: "",
   hour24: true,
   mascot: true,
+  theme: "oled",
 };
 
 let current: Settings = { ...DEFAULTS };

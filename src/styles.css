@@ -75,15 +75,19 @@ body,
   position: relative;
   width: var(--nw);
   height: var(--nh);
-  background: #0a0a0a;
+  background: var(--notch-bg, #000000);
+  border: 1px solid var(--notch-border, rgba(255, 255, 255, 0.06));
   border-radius: 0 0 var(--r) var(--r);
   pointer-events: auto;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--notch-shadow, 0 3px 8px rgba(0, 0, 0, 0.5));
   transform: scale(var(--ui-scale, 1));
   transform-origin: top center;
   transition: width 300ms var(--ease),
     height 300ms var(--ease),
-    border-radius 300ms var(--ease);
+    border-radius 300ms var(--ease),
+    background 250ms ease,
+    border-color 250ms ease,
+    box-shadow 250ms ease;
   will-change: width, height;
 }
 
@@ -166,45 +170,6 @@ body,
     opacity: 1;
     box-shadow: 0 0 10px var(--accent, rgba(255, 255, 255, 0.8));
   }
-}
-
-.clock-arc-wrap {
-  position: relative;
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.clock-arc-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-  overflow: visible;
-}
-
-.clock-arc-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 1.6;
-}
-
-.clock-arc-fg {
-  fill: none;
-  stroke: var(--accent, #f2f2f2);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 400ms ease, stroke 300ms ease;
-  filter: drop-shadow(0 0 3px var(--accent-soft, rgba(255, 255, 255, 0.35)));
-}
-
-.clock-arc-wrap .dot {
-  position: relative;
-  z-index: 1;
 }
 
 .mini-eq {
@@ -1490,10 +1455,6 @@ textarea { -webkit-user-select: text; user-select: text; cursor: text; }
 .notch.compact .clock-layer .dot {
   width: 5px;
   height: 5px;
-}
-.notch.compact .clock-arc-wrap {
-  width: 15px;
-  height: 15px;
 }
 .notch.compact .mini-eq {
   height: 10px;

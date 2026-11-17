@@ -47,6 +47,7 @@ export interface ShelfItem {
 
 export type AccentMode = "preset" | "cover";
 export type AccentColor = "white" | "blue" | "purple" | "green" | "orange" | "pink";
+export type ThemePreset = "oled" | "slate" | "violet" | "frosted";
 
 export interface SettingsState {
   scale: number;
@@ -60,6 +61,7 @@ export interface SettingsState {
   geminiKey: string;
   hour24: boolean;
   mascot: boolean;
+  theme: ThemePreset;
   displays: DisplayOption[];
 }
 
@@ -121,6 +123,11 @@ contextBridge.exposeInMainWorld("raven", {
     const handler = (_e: unknown, on: boolean) => cb(on);
     ipcRenderer.on("settings:mascot", handler);
     return () => ipcRenderer.removeListener("settings:mascot", handler);
+  },
+  onTheme: (cb: (theme: ThemePreset) => void) => {
+    const handler = (_e: unknown, theme: ThemePreset) => cb(theme);
+    ipcRenderer.on("settings:theme", handler);
+    return () => ipcRenderer.removeListener("settings:theme", handler);
   },
   setSettings: (patch: Partial<SettingsState>) =>
     ipcRenderer.invoke("settings:set", patch) as Promise<SettingsState>,

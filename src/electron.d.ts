@@ -52,6 +52,7 @@ export interface ShelfItem {
 
 export type AccentMode = "preset" | "cover";
 export type AccentColor = "white" | "blue" | "purple" | "green" | "orange" | "pink";
+export type ThemePreset = "oled" | "slate" | "violet" | "frosted";
 
 export interface SettingsState {
   scale: number;
@@ -65,6 +66,7 @@ export interface SettingsState {
   geminiKey: string;
   hour24: boolean;
   mascot: boolean;
+  theme: ThemePreset;
   displays: DisplayOption[];
 }
 
@@ -95,6 +97,7 @@ declare global {
       onAccent: (cb: (accent: { mode: AccentMode; color: AccentColor }) => void) => () => void;
       onHour24: (cb: (hour24: boolean) => void) => () => void;
       onMascot: (cb: (on: boolean) => void) => () => void;
+      onTheme: (cb: (theme: ThemePreset) => void) => () => void;
       setSettings: (patch: Partial<SettingsState>) => Promise<SettingsState>;
     };
   }

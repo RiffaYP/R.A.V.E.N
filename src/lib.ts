@@ -82,6 +82,35 @@ export function setAccent(hex: string) {
   document.documentElement.style.setProperty("--accent-faint", hexToRgba(hex, 0.16));
 }
 
+export type ThemePreset = "oled" | "slate" | "violet" | "frosted";
+
+export function setTheme(theme: ThemePreset) {
+  const root = document.documentElement.style;
+  switch (theme) {
+    case "slate":
+      root.setProperty("--notch-bg", "#0b0f19");
+      root.setProperty("--notch-border", "rgba(91, 157, 255, 0.16)");
+      root.setProperty("--notch-shadow", "0 4px 12px rgba(0, 0, 0, 0.6)");
+      break;
+    case "violet":
+      root.setProperty("--notch-bg", "#120a1e");
+      root.setProperty("--notch-border", "rgba(169, 133, 255, 0.22)");
+      root.setProperty("--notch-shadow", "0 4px 14px rgba(20, 0, 40, 0.6)");
+      break;
+    case "frosted":
+      root.setProperty("--notch-bg", "rgba(14, 14, 18, 0.78)");
+      root.setProperty("--notch-border", "rgba(255, 255, 255, 0.14)");
+      root.setProperty("--notch-shadow", "0 6px 18px rgba(0, 0, 0, 0.4)");
+      break;
+    case "oled":
+    default:
+      root.setProperty("--notch-bg", "#000000");
+      root.setProperty("--notch-border", "rgba(255, 255, 255, 0.06)");
+      root.setProperty("--notch-shadow", "0 3px 8px rgba(0, 0, 0, 0.5)");
+      break;
+  }
+}
+
 function hexToRgba(hex: string, a: number) {
   const h = hex.replace("#", "");
   const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { MediaInfo, SystemInfo } from "./types";
-import { useClock, presetAccent, setAccent, dominantAccent } from "./lib";
+import { useClock, presetAccent, setAccent, dominantAccent, setTheme } from "./lib";
 import Media from "./pages/Media";
 import ClockPage from "./pages/ClockPage";
 import Pomodoro from "./pages/Pomodoro";
@@ -24,23 +24,6 @@ const PAGES = [
   { id: "weather", label: "Cuaca" },
   { id: "translate", label: "Terjemah" },
 ] as const;
-
-const ARC_R = 7;
-const ARC_C = 2 * Math.PI * ARC_R;
-
-function getWaterPct(): number {
-  try {
-    const raw = localStorage.getItem("raven.water");
-    if (!raw) return 0;
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    const data = JSON.parse(raw);
-    if (data.date !== today) return 0;
-    return Math.min(100, Math.max(0, Math.round(((data.count || 0) / 8) * 100)));
-  } catch {
-    return 0;
-  }
-}
 
 function checkPomoActive(): boolean {
   try {
@@ -69,7 +52,6 @@ export default function App() {
   const [mascotOn, setMascotOn] = useState(true);
   const [showMascot, setShowMascot] = useState(false);
   const [pomoActive, setPomoActive] = useState(false);
-  const [waterPct, setWaterPct] = useState(0);
   const accentRef = useRef<{ mode: "preset" | "cover"; color: string }>({ mode: "preset", color: "white" });
   const prevSystem = useRef<SystemInfo | null>(null);
   const noticeTimer = useRef<number | undefined>(undefined);
@@ -84,7 +66,6 @@ export default function App() {
   useEffect(() => {
     const updateStats = () => {
       setPomoActive(checkPomoActive());
-      setWaterPct(getWaterPct());
     };
     updateStats();
     const id = window.setInterval(updateStats, 1000);
@@ -104,12 +85,15 @@ export default function App() {
     window.raven.getSettings().then((s) => {
       setHour24(s.hour24 !== false);
       setMascotOn(s.mascot !== false);
+      setTheme(s.theme || "oled");
     });
     const offHour = window.raven.onHour24(setHour24);
     const offMascot = window.raven.onMascot?.(setMascotOn);
+    const offTheme = window.raven.onTheme?.(setTheme);
     return () => {
       offHour();
       offMascot?.();
+      offTheme?.();
     };
   }, []);
 
@@ -240,11 +224,6 @@ export default function App() {
   const hasMedia = !!media;
   const current = PAGES[page];
 
-  const battery = system?.battery ?? 100;
-  const isDesktop = battery === 100 && !system?.charging;
-  const arcPct = Math.min(100, Math.max(0, isDesktop && waterPct > 0 ? waterPct : battery));
-  const arcLabel = isDesktop && waterPct > 0 ? `Air: ${waterPct}%` : `Baterai: ${battery}%`;
-
   return (
     <div
       className="stage"
@@ -260,7 +239,7 @@ export default function App() {
         onMouseLeave={collapse}
       >
         <div className="content">
-          {notice && (
+          {notice && !expanded && (
             <div className={`notice ${notice}`}>
               <div className="notice-icon">
                 <Icon name={notice === "charging" ? "bolt" : "headphone"} size={18} />
@@ -275,22 +254,7 @@ export default function App() {
 
           <div className={`clock-layer ${expanded ? "at-corner" : ""}`}>
             {!expanded && !showMascot && (
-              <div className="clock-arc-wrap" title={arcLabel}>
-                <svg className="clock-arc-svg" viewBox="0 0 18 18" aria-hidden="true">
-                  <circle className="clock-arc-bg" cx="9" cy="9" r={ARC_R} />
-                  <circle
-                    className="clock-arc-fg"
-                    cx="9"
-                    cy="9"
-                    r={ARC_R}
-                    strokeDasharray={ARC_C}
-                    strokeDashoffset={ARC_C * (1 - arcPct / 100)}
-                  />
-                </svg>
-                <span
-                  className={`dot ${pomoActive ? "pomo-pulse" : hasMedia ? "" : "idle"}`}
-                />
-              </div>
+              <span className={`dot ${pomoActive ? "pomo-pulse" : hasMedia ? "" : "idle"}`} />
             )}
             {!expanded && showMascot ? (
               <RavenMascot active={hovering} />

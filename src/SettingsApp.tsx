@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SettingsState } from "./electron";
-import { MONTHS_ID, presetAccent, setAccent } from "./lib";
+import { MONTHS_ID, presetAccent, setAccent, setTheme } from "./lib";
 
 const CITIES = [
   "Bandar Lampung",
@@ -18,6 +18,13 @@ const ACCENTS = [
   { value: "green", label: "Hijau", hex: "#39d98a" },
   { value: "orange", label: "Oranye", hex: "#ff9f43" },
   { value: "pink", label: "Pink", hex: "#ff6fae" },
+] as const;
+
+const THEMES = [
+  { value: "oled", label: "Pure OLED" },
+  { value: "slate", label: "Midnight Slate" },
+  { value: "violet", label: "Cyber Violet" },
+  { value: "frosted", label: "Frosted Glass" },
 ] as const;
 
 export default function SettingsApp() {
@@ -151,6 +158,24 @@ export default function SettingsApp() {
           {settings.accentMode === "cover"
             ? "Warna mengikuti cover lagu yang diputar."
             : "Pilih warna sorotan di seluruh notch."}
+        </div>
+      </section>
+
+      <section className="settings-section">
+        <span className="settings-label">Tema notch</span>
+        <div className="accent-modes theme-modes">
+          {THEMES.map((t) => (
+            <button
+              key={t.value}
+              className={`accent-mode ${settings.theme === t.value ? "on" : ""}`}
+              onClick={() => update({ theme: t.value })}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="settings-hint">
+          Ubah latar belakang notch. Frosted Glass tembus pandang dengan wallpaper.
         </div>
       </section>
 
