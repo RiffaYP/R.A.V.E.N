@@ -25,6 +25,34 @@ const PAGES = [
   { id: "translate", label: "Terjemah" },
 ] as const;
 
+const ARC_R = 7;
+const ARC_C = 2 * Math.PI * ARC_R;
+
+function getWaterPct(): number {
+  try {
+    const raw = localStorage.getItem("raven.water");
+    if (!raw) return 0;
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const data = JSON.parse(raw);
+    if (data.date !== today) return 0;
+    return Math.min(100, Math.max(0, Math.round(((data.count || 0) / 8) * 100)));
+  } catch {
+    return 0;
+  }
+}
+
+function checkPomoActive(): boolean {
+  try {
+    const raw = localStorage.getItem("raven.pomodoro2");
+    if (!raw) return false;
+    const p = JSON.parse(raw);
+    return !!p.running && !!p.endAt && p.endAt > Date.now();
+  } catch {
+    return false;
+  }
+}
+
 export default function App() {
   const [hour24, setHour24] = useState(true);
   const time = useClock(hour24);
@@ -40,6 +68,8 @@ export default function App() {
   const [hovering, setHovering] = useState(false);
   const [mascotOn, setMascotOn] = useState(true);
   const [showMascot, setShowMascot] = useState(false);
+  const [pomoActive, setPomoActive] = useState(false);
+  const [waterPct, setWaterPct] = useState(0);
   const accentRef = useRef<{ mode: "preset" | "cover"; color: string }>({ mode: "preset", color: "white" });
   const prevSystem = useRef<SystemInfo | null>(null);
   const noticeTimer = useRef<number | undefined>(undefined);
@@ -50,6 +80,16 @@ export default function App() {
   useEffect(() => window.raven.onMedia(setMedia), []);
   useEffect(() => window.raven.onSystem(setSystem), []);
   useEffect(() => window.raven.onCompact(setCompact), []);
+
+  useEffect(() => {
+    const updateStats = () => {
+      setPomoActive(checkPomoActive());
+      setWaterPct(getWaterPct());
+    };
+    updateStats();
+    const id = window.setInterval(updateStats, 1000);
+    return () => window.clearInterval(id);
+  }, []);
 
   useEffect(() => {
     const apply = (scale: number) => {
@@ -200,6 +240,11 @@ export default function App() {
   const hasMedia = !!media;
   const current = PAGES[page];
 
+  const battery = system?.battery ?? 100;
+  const isDesktop = battery === 100 && !system?.charging;
+  const arcPct = Math.min(100, Math.max(0, isDesktop && waterPct > 0 ? waterPct : battery));
+  const arcLabel = isDesktop && waterPct > 0 ? `Air: ${waterPct}%` : `Baterai: ${battery}%`;
+
   return (
     <div
       className="stage"
@@ -229,7 +274,24 @@ export default function App() {
           )}
 
           <div className={`clock-layer ${expanded ? "at-corner" : ""}`}>
-            {!expanded && !showMascot && <span className={`dot ${hasMedia ? "" : "idle"}`} />}
+            {!expanded && !showMascot && (
+              <div className="clock-arc-wrap" title={arcLabel}>
+                <svg className="clock-arc-svg" viewBox="0 0 18 18" aria-hidden="true">
+                  <circle className="clock-arc-bg" cx="9" cy="9" r={ARC_R} />
+                  <circle
+                    className="clock-arc-fg"
+                    cx="9"
+                    cy="9"
+                    r={ARC_R}
+                    strokeDasharray={ARC_C}
+                    strokeDashoffset={ARC_C * (1 - arcPct / 100)}
+                  />
+                </svg>
+                <span
+                  className={`dot ${pomoActive ? "pomo-pulse" : hasMedia ? "" : "idle"}`}
+                />
+              </div>
+            )}
             {!expanded && showMascot ? (
               <RavenMascot active={hovering} />
             ) : !expanded && peekTitle && media?.title ? (
@@ -238,6 +300,11 @@ export default function App() {
               </span>
             ) : (
               <span className="clock">{time}</span>
+            )}
+            {!expanded && !showMascot && media?.isPlaying && (
+              <span className="mini-eq" aria-label="Audio visualizer" title={`Memutar: ${media.title}`}>
+                <span /><span /><span />
+              </span>
             )}
           </div>
 
