@@ -15,7 +15,7 @@ Dibangun dengan **Electron + React + TypeScript**.
 
 | Halaman | Isi |
 |---|---|
-| **Musik** | Cover album (iTunes → Deezer), judul/artis, lirik sinkron (LRCLIB → lyrics.ovh), progress + seek (klik/geser), kontrol prev/play/next, background blur dari cover |
+| **Musik** | Cover album (iTunes → Deezer), judul/artis, lirik sinkron (LRCLIB → lyrics.ovh) + jeda instrumen & marquee baris panjang, progress + seek (klik/geser), kontrol prev/play/next, background blur dari cover |
 | **Jam & Kalender** | Jam besar + detik, tanggal Indonesia, kalender bulanan |
 | **Pomodoro** | Ring progres, mode Fokus/Istirahat, durasi atur, jalan lintas halaman |
 | **Sistem** | Baterai & health, WiFi, Bluetooth (status + baterai GATT), Caps Lock, volume, kecerahan |
@@ -26,6 +26,7 @@ Dibangun dengan **Electron + React + TypeScript**.
 | **Terjemah** | Terjemahan via Google Gemini, 9 bahasa, toggle transliterasi latin |
 
 ### Perilaku global
+- **Closed state hidup (Dynamic Island style)** — notch tertutup menampilkan progress arc baterai/air (SVG), breathing pulse saat Pomodoro aktif, dan mini audio visualizer 3 batang saat musik memutar.
 - **Ringan di latar** — data diambil lewat worker PowerShell persisten (satu proses), bukan
   spawn proses baru tiap poll; lirik tetap sinkron ~500ms.
 - **Idle peek** — notch tertutup bergantian jam ↔ judul lagu.
