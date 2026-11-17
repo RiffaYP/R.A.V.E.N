@@ -7,6 +7,63 @@ import UIIcon from "../components/Icon";
 
 const WINDOW = 3;
 
+function isInstrumentalBreak(
+  lines: { t: number; text: string }[],
+  activeIndex: number,
+  livePos: number,
+  duration: number,
+  offset: number
+): boolean {
+  if (lines.length === 0) return false;
+  const adj = livePos + 100 + offset;
+  if (activeIndex === -1) {
+    const firstT = lines[0].t;
+    return firstT >= 6000 && adj >= 1000 && adj < firstT - 1500;
+  }
+  const currT = lines[activeIndex].t;
+  const nextT =
+    activeIndex + 1 < lines.length
+      ? lines[activeIndex + 1].t
+      : duration > currT
+      ? duration
+      : currT;
+  const gap = nextT - currT;
+  return gap >= 6000 && adj >= currT + 2500 && adj < nextT - 1500;
+}
+
+function LyricRow({ text, active }: { text: string; active: boolean }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [marquee, setMarquee] = useState(false);
+
+  useEffect(() => {
+    if (!active) {
+      setMarquee(false);
+      return;
+    }
+    const r = rowRef.current;
+    const t = textRef.current;
+    if (r && t) {
+      const diff = t.scrollWidth - r.clientWidth;
+      if (diff > 8) {
+        r.style.setProperty("--scroll-dist", `${diff}px`);
+        setMarquee(true);
+        return;
+      }
+    }
+    setMarquee(false);
+  }, [active, text]);
+
+  return (
+    <div
+      ref={rowRef}
+      className={`lyric ${active ? "on" : ""} ${marquee ? "marquee" : ""}`}
+    >
+      <span ref={textRef} className="lyric-text">{text}</span>
+    </div>
+  );
+}
+
 function Icon({ name }: { name: "prev" | "play" | "pause" | "next" }) {
   const paths: Record<string, React.ReactNode> = {
     prev: (
@@ -74,6 +131,7 @@ export default function Media({ media }: { media: MediaInfo | null }) {
   }
   const showLyrics = lines.length > 0;
   const synced = showLyrics && !!media?.lyricsSynced;
+  const isBreak = synced && isInstrumentalBreak(lines, activeIndex, livePos, duration, offset);
   const sliceStart = synced ? Math.max(0, activeIndex - 1) : 0;
   const visible = synced ? lines.slice(sliceStart, sliceStart + WINDOW) : [];
   const activeLocal = activeIndex - sliceStart;
@@ -136,9 +194,25 @@ export default function Media({ media }: { media: MediaInfo | null }) {
 
       {synced ? (
         <div className="lyrics-scroll media-lyrics">
-          {visible.map((l, i) => (
-            <div key={sliceStart + i} className={`lyric ${i === activeLocal ? "on" : ""}`}>{l.text}</div>
-          ))}
+          {isBreak ? (
+            <div className="lyric-break" aria-label="Instrumental">
+              <span className="break-dot" />
+              <span className="break-dot" />
+              <span className="break-dot" />
+              <span className="break-note">♪</span>
+              <span className="break-dot" />
+              <span className="break-dot" />
+              <span className="break-dot" />
+            </div>
+          ) : (
+            visible.map((l, i) => (
+              <LyricRow
+                key={sliceStart + i}
+                text={l.text}
+                active={i === activeLocal}
+              />
+            ))
+          )}
         </div>
       ) : showLyrics ? (
         <div className="lyrics-plain media-lyrics">{lines.map((line, i) => <p key={i}>{line.text}</p>)}</div>
