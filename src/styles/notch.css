@@ -1,0 +1,254 @@
+/* ==========================================================================
+   Notch shell: closed/expanded body, clock layer, dynamic-island behaviours,
+   mascot, idle peek, transient notices, compact strip.
+   ========================================================================== */
+
+/* wrapper: real notch body */
+.notch {
+  --nw: 172px;
+  --nh: 34px;
+  --r: 17px;
+  position: relative;
+  width: var(--nw);
+  height: var(--nh);
+  background: var(--notch-bg, #000000);
+  border: 1px solid var(--notch-border, rgba(255, 255, 255, 0.06));
+  border-radius: 0 0 var(--r) var(--r);
+  pointer-events: auto;
+  box-shadow: var(--notch-shadow, 0 3px 8px rgba(0, 0, 0, 0.5));
+  transform: scale(var(--ui-scale, 1));
+  transform-origin: top center;
+  transition: width 300ms var(--ease),
+    height 300ms var(--ease),
+    border-radius 300ms var(--ease),
+    background 250ms ease,
+    border-color 250ms ease,
+    box-shadow 250ms ease;
+  will-change: width, height;
+}
+
+.notch.open {
+  --nw: 418px;
+  --nh: 250px;
+  --r: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
+}
+
+.content {
+  position: absolute;
+  inset: 0;
+  border-radius: 0 0 var(--r) var(--r);
+  overflow: hidden;
+}
+
+/* clock layer: always-on-top, never hidden by panel transitions */
+.clock-layer {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 34px;
+  transition: top 260ms var(--ease),
+    right 260ms var(--ease),
+    left 260ms var(--ease),
+    height 260ms var(--ease),
+    opacity 180ms ease;
+}
+
+.clock-layer .clock {
+  transition: font-size 220ms var(--ease), color 200ms ease;
+}
+
+.clock-layer.at-corner {
+  top: 12px;
+  left: auto;
+  right: 20px;
+  height: 16px;
+}
+
+.clock-layer.at-corner .clock {
+  font-size: 11px;
+  color: #9a9a9a;
+}
+
+.clock {
+  color: #f2f2f2;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent, #f2f2f2);
+  box-shadow: 0 0 7px var(--accent-soft, rgba(255, 255, 255, 0.55));
+}
+
+.dot.idle {
+  background: #555;
+  box-shadow: none;
+}
+
+.dot.pomo-pulse {
+  background: var(--accent, #f2f2f2);
+  animation: pomo-breath 2s ease-in-out infinite;
+}
+
+@keyframes pomo-breath {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.35;
+    box-shadow: 0 0 2px var(--accent-soft, rgba(255, 255, 255, 0.2));
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 1;
+    box-shadow: 0 0 10px var(--accent, rgba(255, 255, 255, 0.8));
+  }
+}
+
+/* mini audio visualizer in the closed notch */
+.mini-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+  padding-bottom: 1px;
+}
+
+.mini-eq span {
+  width: 2.2px;
+  border-radius: 1.2px;
+  background: var(--accent, #f2f2f2);
+  box-shadow: 0 0 6px var(--accent-soft, rgba(255, 255, 255, 0.4));
+  animation: mini-eq-wave 0.85s ease-in-out infinite alternate;
+}
+
+.mini-eq span:nth-child(1) { height: 35%; animation-duration: 0.7s; animation-delay: 0.1s; }
+.mini-eq span:nth-child(2) { height: 90%; animation-duration: 0.9s; animation-delay: 0.35s; }
+.mini-eq span:nth-child(3) { height: 55%; animation-duration: 0.75s; animation-delay: 0.2s; }
+
+@keyframes mini-eq-wave {
+  0% { height: 25%; }
+  100% { height: 100%; }
+}
+
+/* ===== Raven mascot (idle eyes in the closed notch) ===== */
+.mascot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 22px;
+  animation: mascot-fade-in 320ms var(--ease);
+}
+.mascot-svg { width: 52px; height: 22px; display: block; overflow: visible; }
+.mascot .halo-l,
+.mascot .halo-r { animation: mascot-glow 3.6s ease-in-out infinite; }
+.mascot .halo-r { animation-delay: 0.4s; }
+.mascot.wave .mascot-eyes { animation: mascot-wave 600ms var(--ease); }
+.mascot .mascot-eyes { transform-origin: center; }
+@keyframes mascot-fade-in {
+  from { opacity: 0; transform: scale(0.86); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes mascot-glow {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+@keyframes mascot-wave {
+  0% { transform: scaleY(0.15); opacity: 0.6; }
+  45% { transform: scaleY(1.12); }
+  100% { transform: scaleY(1); }
+}
+
+/* ===== idle peek: title ticker in collapsed notch ===== */
+.peek-title {
+  display: inline-block;
+  max-width: 104px;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: middle;
+  mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+.peek-track {
+  display: inline-block;
+  padding-left: 100%;
+  color: #eaeaea;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  animation: peek-marquee 9s linear infinite;
+}
+@keyframes peek-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+/* ===== transient notices (charging / headphone) ===== */
+.notch.notice-open {
+  --nw: 360px;
+  --nh: 74px;
+  --r: 22px;
+  border-radius: 0 0 var(--r) var(--r);
+}
+
+.notice {
+  position: absolute;
+  z-index: 12;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  animation: notice-in 300ms var(--ease);
+}
+@keyframes notice-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.notice-icon {
+  width: 40px; height: 40px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+  background: var(--accent, #fff);
+  color: #0a0a0a;
+  box-shadow: 0 0 14px var(--accent-soft, rgba(255,255,255,0.5));
+}
+.notice-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.notice-title { font-size: 15px; font-weight: 700; color: #fff; }
+.notice-sub { font-size: 11px; color: #9a9a9a; }
+.notice-value { font-size: 22px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+
+/* ===== compact "peek" strip (fullscreen / manual) ===== */
+.notch.compact {
+  --nw: 132px;
+  --nh: 24px;
+  --r: 12px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: width 260ms var(--ease),
+    height 260ms var(--ease),
+    border-radius 260ms var(--ease),
+    opacity 200ms ease;
+}
+.notch.compact:hover { opacity: 1; }
+.notch.compact .clock-layer { height: 24px; gap: 6px; }
+.notch.compact .clock-layer .dot { width: 5px; height: 5px; }
+.notch.compact .mini-eq { height: 10px; }
+.notch.compact .clock-layer .clock { font-size: 11px; color: #e8e8e8; }
+.notch.compact .peek-title { max-width: 96px; }
+.notch.compact .panel { opacity: 0; pointer-events: none; }
+.notch.compact .notice-open { opacity: 1; }

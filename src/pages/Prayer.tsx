@@ -1,15 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useLocalStorage, useNow } from "../lib";
+import { CITIES, CITY_NAMES } from "../shared";
 import PageHeader from "../components/PageHeader";
-
-const CITIES: Record<string, { lat: number; lng: number; tz: number }> = {
-  "Bandar Lampung": { lat: -5.4292, lng: 105.2610, tz: 7 },
-  Jakarta: { lat: -6.2088, lng: 106.8456, tz: 7 },
-  Bandung: { lat: -6.9175, lng: 107.6191, tz: 7 },
-  Surabaya: { lat: -7.2575, lng: 112.7521, tz: 7 },
-  Medan: { lat: 3.5952, lng: 98.6722, tz: 7 },
-  Makassar: { lat: -5.1477, lng: 119.4327, tz: 8 },
-};
 
 function degToRad(d: number) { return (d * Math.PI) / 180; }
 function radToDeg(r: number) { return (r * 180) / Math.PI; }
@@ -80,7 +72,7 @@ export default function Prayer() {
     setCity(value);
     window.raven.setSettings({ city: value }).catch(() => {});
   };
-  const times = useMemo(() => prayerTimes(coords.lat, coords.lng, now, coords.tz), [now, coords]);
+  const times = useMemo(() => prayerTimes(coords.lat, coords.lng, now, coords.tz), [now, coords.lat, coords.lng, coords.tz]);
 
   const currentMin = now.getHours() * 60 + now.getMinutes();
   const parsed = times.map((t) => {
@@ -95,7 +87,7 @@ export default function Prayer() {
         title="Jadwal Sholat"
         right={
           <select value={city} onChange={(e) => chooseCity(e.target.value)} className="prayer-select">
-            {Object.keys(CITIES).map((c) => <option key={c} value={c}>{c}</option>)}
+            {CITY_NAMES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         }
       />

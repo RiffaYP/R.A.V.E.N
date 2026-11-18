@@ -1,0 +1,167 @@
+/* ===== settings window ===== */
+body.settings-mode,
+body.settings-mode #root {
+  background: #0a0a0a;
+  height: 100%;
+  overflow: auto;
+}
+body.settings-mode #root { display: block; }
+body.settings-mode { -webkit-user-select: auto; user-select: auto; cursor: auto; }
+
+input,
+textarea { -webkit-user-select: text; user-select: text; cursor: text; }
+
+.settings-root {
+  width: 100%;
+  min-height: 100%;
+  background: #0a0a0a;
+  color: #f2f2f2;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  padding: 22px 26px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+.settings-loading { color: #888; font-size: 13px; padding: 40px 0; text-align: center; }
+
+.settings-header { display: flex; align-items: center; gap: 12px; padding-bottom: 6px; }
+.settings-logo {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, #3a3a3a, #111);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; color: #fff; font-size: 15px;
+}
+.settings-title { font-size: 15px; font-weight: 700; }
+.settings-subtitle { font-size: 11.5px; color: #8a8a8a; margin-top: 1px; }
+
+.settings-section {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 13px 14px;
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.settings-row { flex-direction: row; align-items: center; justify-content: space-between; }
+.settings-label-row { display: flex; align-items: center; justify-content: space-between; }
+.settings-label { font-size: 13px; font-weight: 600; color: #eaeaea; }
+.settings-value { font-size: 12.5px; color: #9a9a9a; font-variant-numeric: tabular-nums; }
+.settings-hint { font-size: 11px; color: #7f7f7f; }
+
+.settings-section input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.16);
+  outline: none;
+}
+.settings-section input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  background: var(--accent, #fff);
+  cursor: pointer;
+  box-shadow: 0 0 6px var(--accent-soft, rgba(255,255,255,0.4));
+}
+
+.settings-select {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 9px;
+  color: #eee;
+  font-size: 12.5px;
+  padding: 8px 10px;
+  outline: none;
+  cursor: pointer;
+}
+.settings-select:focus { border-color: rgba(255,255,255,0.3); }
+
+.settings-input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 9px;
+  color: #eee;
+  font-size: 12.5px;
+  padding: 8px 10px;
+  outline: none;
+}
+.settings-input:focus { border-color: rgba(255,255,255,0.3); }
+.settings-input::placeholder { color: #666; }
+
+.settings-toggle {
+  width: 44px; height: 24px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255,255,255,0.16);
+  position: relative;
+  cursor: pointer;
+  transition: background 180ms ease;
+  flex: 0 0 auto;
+}
+.settings-toggle span {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 200ms var(--ease);
+}
+.settings-toggle.on { background: var(--accent, #f0f0f0); }
+.settings-toggle.on span { transform: translateX(20px); background: #0a0a0a; }
+
+.settings-btn {
+  border: 1px solid rgba(255,255,255,0.16);
+  background: transparent;
+  color: #ddd;
+  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+  flex: 0 0 auto;
+}
+.settings-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+.settings-footer { margin-top: auto; text-align: center; font-size: 10.5px; color: #5f5f5f; padding-top: 8px; }
+
+/* ===== accent picker ===== */
+.accent-modes { display: flex; gap: 6px; }
+.accent-mode {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 9px;
+  background: transparent;
+  color: #cfcfcf;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.accent-mode.on { background: var(--accent, #fff); color: #0a0a0a; border-color: var(--accent, #fff); font-weight: 600; }
+.accent-swatches { display: flex; gap: 8px; margin-top: 4px; }
+.accent-swatch {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: transform 140ms ease, border-color 140ms ease;
+}
+.accent-swatch:hover { transform: scale(1.1); }
+.accent-swatch.on { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.2); }
+
+/* ===== settings select options (dark, readable) ===== */
+.settings-select option {
+  background: #151515;
+  color: #eaeaea;
+}
+.settings-select option:checked {
+  background: #2a2a2a;
+  color: #fff;
+}

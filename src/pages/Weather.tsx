@@ -1,15 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "../lib";
+import { CITIES, CITY_NAMES } from "../shared";
 import PageHeader from "../components/PageHeader";
-
-const CITIES: Record<string, { lat: number; lng: number }> = {
-  "Bandar Lampung": { lat: -5.4292, lng: 105.2610 },
-  Jakarta: { lat: -6.2088, lng: 106.8456 },
-  Bandung: { lat: -6.9175, lng: 107.6191 },
-  Surabaya: { lat: -7.2575, lng: 112.7521 },
-  Medan: { lat: 3.5952, lng: 98.6722 },
-  Makassar: { lat: -5.1477, lng: 119.4327 },
-};
 
 const CODES: Record<number, string> = {
   0: "Cerah", 1: "Cerah berawan", 2: "Berawan", 3: "Mendung",
@@ -148,15 +140,15 @@ export default function Weather() {
         sub={city}
         right={
           <select value={city} onChange={(e) => chooseCity(e.target.value)} className="prayer-select">
-            {Object.keys(CITIES).map((c) => <option key={c} value={c}>{c}</option>)}
+            {CITY_NAMES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         }
       />
 
       <div className="wx-tabs">
-        <button className={tab === "now" ? "on" : ""} onClick={() => setTab("now")}>Sekarang</button>
-        <button className={tab === "hour" ? "on" : ""} onClick={() => setTab("hour")}>Jam</button>
-        <button className={tab === "day" ? "on" : ""} onClick={() => setTab("day")}>7 Hari</button>
+        <button className={`chip ${tab === "now" ? "on" : ""}`} onClick={() => setTab("now")}>Sekarang</button>
+        <button className={`chip ${tab === "hour" ? "on" : ""}`} onClick={() => setTab("hour")}>Jam</button>
+        <button className={`chip ${tab === "day" ? "on" : ""}`} onClick={() => setTab("day")}>7 Hari</button>
       </div>
 
       {error ? (

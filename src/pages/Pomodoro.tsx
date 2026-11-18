@@ -81,8 +81,8 @@ export default function Pomodoro() {
         sub={state.phase === "focus" ? "Fokus" : "Istirahat"}
         right={
           <div className="pomo-tabs">
-            <button className={state.phase === "focus" ? "on" : ""} onClick={() => setPhase("focus")}>Fokus</button>
-            <button className={state.phase === "break" ? "on" : ""} onClick={() => setPhase("break")}>Istirahat</button>
+            <button className={`chip ${state.phase === "focus" ? "on" : ""}`} onClick={() => setPhase("focus")}>Fokus</button>
+            <button className={`chip ${state.phase === "break" ? "on" : ""}`} onClick={() => setPhase("break")}>Istirahat</button>
           </div>
         }
       />

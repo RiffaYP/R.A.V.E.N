@@ -26,9 +26,9 @@ export default function Tools() {
         title="Alat"
         right={
           <div className="tools-tabs">
-            <button className={tab === "todo" ? "on" : ""} onClick={() => setTab("todo")}>To-do</button>
-            <button className={tab === "clip" ? "on" : ""} onClick={() => setTab("clip")}>Clipboard</button>
-            <button className={tab === "shelf" ? "on" : ""} onClick={() => setTab("shelf")}>Shelf</button>
+            <button className={`chip ${tab === "todo" ? "on" : ""}`} onClick={() => setTab("todo")}>To-do</button>
+            <button className={`chip ${tab === "clip" ? "on" : ""}`} onClick={() => setTab("clip")}>Clipboard</button>
+            <button className={`chip ${tab === "shelf" ? "on" : ""}`} onClick={() => setTab("shelf")}>Shelf</button>
           </div>
         }
       />

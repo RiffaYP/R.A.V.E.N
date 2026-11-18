@@ -1,15 +1,6 @@
 import { useEffect, useState } from "react";
-import type { SettingsState } from "./electron";
-import { MONTHS_ID, presetAccent, setAccent, setTheme } from "./lib";
-
-const CITIES = [
-  "Bandar Lampung",
-  "Jakarta",
-  "Bandung",
-  "Surabaya",
-  "Medan",
-  "Makassar",
-];
+import { CITY_NAMES, type SettingsState } from "./shared";
+import { MONTHS_ID, presetAccent, setAccent } from "./lib";
 
 const ACCENTS = [
   { value: "white", label: "Putih", hex: "#f2f2f2" },
@@ -103,7 +94,7 @@ export default function SettingsApp() {
           value={settings.city}
           onChange={(e) => update({ city: e.target.value })}
         >
-          {CITIES.map((c) => (
+          {CITY_NAMES.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
