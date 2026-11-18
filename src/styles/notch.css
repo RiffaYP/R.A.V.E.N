@@ -12,7 +12,9 @@
   width: var(--nw);
   height: var(--nh);
   background: var(--notch-bg, #000000);
-  border: 1px solid var(--notch-border, rgba(255, 255, 255, 0.06));
+  /* Border transparan: tepi dibentuk shadow/inset, bukan garis 1px yang
+     terbaca sebagai outline keras di tema berwarna (slate/violet/frosted). */
+  border: 1px solid transparent;
   border-radius: 0 0 var(--r) var(--r);
   pointer-events: auto;
   box-shadow: var(--notch-shadow, 0 3px 8px rgba(0, 0, 0, 0.5)),
@@ -41,10 +43,10 @@
    Bukan gradient yang di-blur (mahal + terpotong di window sempit), tapi dua
    lapis bayangan tipis dari aksen aktif yang diberi breathe halus, plus tint
    border. Hanya menyala saat .glow | .playing dipasang dari App. */
-.notch.glow {
-  border-color: color-mix(in srgb, var(--glow, var(--accent, #fff)) 22%, var(--notch-border, transparent));
-}
+/* Tint border hanya saat lagu benar-benar memutar; idle tetap pakai border
+   bawaan (tipis) supaya tidak muncul garis terang di tepi notch. */
 .notch.glow.playing {
+  border-color: color-mix(in srgb, var(--glow, var(--accent, #fff)) 20%, var(--notch-border, transparent));
   animation: glow-breathe 3.6s ease-in-out infinite;
 }
 /* ::before paints under .content (later sibling) so the tint never covers UI */
@@ -85,6 +87,9 @@ body[data-shape="glass"] .notch {
   margin-top: 6px;
   --r: 22px;
   border-radius: var(--r);
+  /* Pill melayang: border 1px terbaca sebagai outline keras di semua sisi.
+     Transparan-kan agar tepi hanya dibentuk shadow (lembut, tanpa garis). */
+  border-color: transparent;
 }
 body[data-shape="floating"] .notch .content,
 body[data-shape="glass"] .notch .content {

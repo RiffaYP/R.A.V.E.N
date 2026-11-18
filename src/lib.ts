@@ -94,17 +94,17 @@ export function setTheme(theme: ThemePreset) {
   switch (theme) {
     case "slate":
       root.setProperty("--notch-bg", "#0b0f19");
-      root.setProperty("--notch-border", "rgba(91, 157, 255, 0.16)");
+      root.setProperty("--notch-border", "rgba(91, 157, 255, 0.06)");
       root.setProperty("--notch-shadow", "0 4px 12px rgba(0, 0, 0, 0.6)");
       break;
     case "violet":
       root.setProperty("--notch-bg", "#120a1e");
-      root.setProperty("--notch-border", "rgba(169, 133, 255, 0.22)");
+      root.setProperty("--notch-border", "rgba(169, 133, 255, 0.08)");
       root.setProperty("--notch-shadow", "0 4px 14px rgba(20, 0, 40, 0.6)");
       break;
     case "frosted":
       root.setProperty("--notch-bg", "rgba(14, 14, 18, 0.78)");
-      root.setProperty("--notch-border", "rgba(255, 255, 255, 0.14)");
+      root.setProperty("--notch-border", "rgba(255, 255, 255, 0.05)");
       root.setProperty("--notch-shadow", "0 6px 18px rgba(0, 0, 0, 0.4)");
       break;
     case "oled":
