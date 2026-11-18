@@ -198,6 +198,10 @@
   text-overflow: ellipsis;
 }
 
+.viz-track { margin-top: 6px; height: 12px; }
+.viz-track span { width: 2.2px; }
+.viz-track.off { display: none; }
+
 .lyrics-scroll {
   margin-top: 10px;
   height: 92px;
@@ -481,34 +485,43 @@
 .media-lyrics .lyric { transform-origin: center; }
 .media-lyrics.lyrics-empty { margin-top: 0; }
 
-/* equalizer badge over album art */
+/* ===== visualizer (bars pseudo-driven by playback position) =====
+   Actual bar "phase" comes from JS (--lead = progress), so the bar shapes
+   change with the song instead of running a free-running CSS loop. */
+.viz {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+}
+.viz span {
+  display: block;
+  width: 2.4px;
+  border-radius: 1.2px;
+  background: var(--accent, #fff);
+  --amp: 0.2;
+  transform: scaleY(var(--amp));
+  transform-origin: bottom;
+  transition: transform 320ms var(--ease), opacity 200ms ease;
+  opacity: 0.9;
+}
+.viz.off span {
+  --amp: 0.15;
+  opacity: 0.35;
+}
+
+/* badge variant over album art: dark chip so bars read on light covers */
 .eq {
   position: absolute;
   left: 5px;
   bottom: 5px;
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 14px;
   padding: 3px 4px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(4px);
 }
-.eq span {
-  width: 2px;
-  border-radius: 1px;
-  background: var(--accent, #fff);
-  animation: eq-bounce 900ms ease-in-out infinite;
-}
-.eq span:nth-child(1) { height: 40%; animation-delay: 0ms; }
-.eq span:nth-child(2) { height: 90%; animation-delay: 150ms; }
-.eq span:nth-child(3) { height: 60%; animation-delay: 300ms; }
-.eq span:nth-child(4) { height: 80%; animation-delay: 450ms; }
-@keyframes eq-bounce {
-  0%, 100% { transform: scaleY(0.4); }
-  50% { transform: scaleY(1); }
-}
+.eq span { width: 2px; }
+
 
 /* ===== clock page ===== */
 .page.clock-page.has-head { padding-top: 34px; align-items: center; }

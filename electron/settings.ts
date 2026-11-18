@@ -5,6 +5,7 @@ import path from "node:path";
 export type AccentMode = "preset" | "cover";
 export type AccentColor = "white" | "blue" | "purple" | "green" | "orange" | "pink";
 export type ThemePreset = "oled" | "slate" | "violet" | "frosted";
+export type NotchShape = "attached" | "floating" | "glass";
 
 export interface Settings {
   scale: number;
@@ -19,6 +20,8 @@ export interface Settings {
   hour24: boolean;
   mascot: boolean;
   theme: ThemePreset;
+  shape: NotchShape;
+  glow: boolean;
 }
 
 const DEFAULTS: Settings = {
@@ -34,6 +37,8 @@ const DEFAULTS: Settings = {
   hour24: true,
   mascot: true,
   theme: "oled",
+  shape: "attached",
+  glow: true,
 };
 
 let current: Settings = { ...DEFAULTS };

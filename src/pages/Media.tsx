@@ -4,6 +4,7 @@ import type { MediaInfo } from "../types";
 import { fmtTime } from "../lib";
 import PageHeader from "../components/PageHeader";
 import UIIcon from "../components/Icon";
+import Visualizer from "../components/Visualizer";
 
 const WINDOW = 3;
 
@@ -180,16 +181,13 @@ export default function Media({ media }: { media: MediaInfo | null }) {
       <PageHeader title="Musik" sub={media?.isPlaying ? "Memutar" : media ? "Dijeda" : "Tidak ada media"} />
       <div className={`art ${media?.cover ? "has-img" : ""}`}>
         {media?.cover ? <img src={media.cover} alt="" /> : <span className="art-icon"><UIIcon name="music" size={24} /></span>}
-        {media?.isPlaying && (
-          <span className="eq">
-            <span /><span /><span /><span />
-          </span>
-        )}
+        <Visualizer progress={progress} playing={!!media?.isPlaying} bars={4} className="eq" />
       </div>
 
       <div className="info">
         <div className="title" title={media?.title}>{media?.title ?? "Tidak ada media"}</div>
         {media?.artist && <div className="artist">{media.artist}</div>}
+        <Visualizer progress={progress} playing={!!media?.isPlaying} bars={7} className="viz-track" />
       </div>
 
       {synced ? (

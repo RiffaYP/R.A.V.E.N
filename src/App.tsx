@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { MediaInfo, SystemInfo } from "./types";
-import { useClock, presetAccent, setAccent, dominantAccent, setTheme } from "./lib";
+import { useClock, presetAccent, setAccent, dominantAccent, setTheme, setShape } from "./lib";
 import Media from "./pages/Media";
 import ClockPage from "./pages/ClockPage";
 import Pomodoro from "./pages/Pomodoro";
@@ -50,6 +50,8 @@ export default function App() {
   const [compact, setCompact] = useState(false);
   const [hovering, setHovering] = useState(false);
   const [mascotOn, setMascotOn] = useState(true);
+  const [glowOn, setGlowOn] = useState(true);
+  const [glowColor, setGlowColor] = useState("#ffffff");
   const [showMascot, setShowMascot] = useState(false);
   const [pomoActive, setPomoActive] = useState(false);
   const accentRef = useRef<{ mode: "preset" | "cover"; color: string }>({ mode: "preset", color: "white" });
@@ -85,15 +87,21 @@ export default function App() {
     window.raven.getSettings().then((s) => {
       setHour24(s.hour24 !== false);
       setMascotOn(s.mascot !== false);
+      setGlowOn(s.glow !== false);
       setTheme(s.theme || "oled");
+      setShape(s.shape || "attached");
     });
     const offHour = window.raven.onHour24(setHour24);
     const offMascot = window.raven.onMascot?.(setMascotOn);
     const offTheme = window.raven.onTheme?.(setTheme);
+    const offShape = window.raven.onShape?.(setShape);
+    const offGlow = window.raven.onGlow?.(setGlowOn);
     return () => {
       offHour();
       offMascot?.();
       offTheme?.();
+      offShape?.();
+      offGlow?.();
     };
   }, []);
 
@@ -120,11 +128,15 @@ export default function App() {
   useEffect(() => {
     const applyAccent = (mode: "preset" | "cover", color: string, cover: string) => {
       accentRef.current = { mode, color };
+      const apply = (hex: string) => {
+        setAccent(hex);
+        setGlowColor(hex);
+      };
       if (mode === "cover") {
-        if (cover) dominantAccent(cover).then(setAccent);
-        else setAccent(presetAccent("white"));
+        if (cover) dominantAccent(cover).then(apply);
+        else apply(presetAccent("white"));
       } else {
-        setAccent(presetAccent(color));
+        apply(presetAccent(color));
       }
     };
     window.raven.getSettings().then((s) => {
@@ -139,9 +151,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const { mode, color } = accentRef.current;
-    if (mode === "cover" && media?.cover) dominantAccent(media.cover).then(setAccent);
+    const { mode } = accentRef.current;
+    if (mode === "cover" && media?.cover) {
+      dominantAccent(media.cover).then((hex) => {
+        setAccent(hex);
+        setGlowColor(hex);
+      });
+    }
   }, [media?.cover]);
+
 
   useEffect(() => {
     const canPeek = !expanded && !!media?.isPlaying && !!media?.title;
@@ -234,7 +252,8 @@ export default function App() {
     >
       <div
         ref={notchRef}
-        className={`notch ${expanded ? "open" : ""} ${isCompact ? "compact" : ""} ${notice && !expanded ? "notice-open" : ""}`}
+        className={`notch ${expanded ? "open" : ""} ${isCompact ? "compact" : ""} ${notice && !expanded ? "notice-open" : ""} ${glowOn ? "glow" : ""} ${media?.isPlaying ? "playing" : ""}`}
+        style={{ ["--glow" as string]: glowColor }}
         onMouseEnter={expand}
         onMouseLeave={collapse}
       >

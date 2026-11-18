@@ -34,6 +34,9 @@ Dibangun dengan **Electron + React + TypeScript**.
 - **Notifikasi transient** — melebar saat charger dicolok / headphone terhubung.
 - **Auto-compact** — notch mengecil jadi strip mini saat ada fullscreen sungguhan.
 - **Warna aksen** — preset atau mengikuti warna dominan cover album.
+- **Glow cover** — aura tepi notch mengikuti aksen/cover, breathe halus saat musik memutar.
+- **Bentuk notch** — menempel ke tepi atas, melayang (pill), atau kaca translusen.
+- **Visualizer** — strip bar di halaman Musik yang bergerak mengikuti posisi lagu.
 - **Update check** — cek rilis GitHub sekali saat start; notifikasi bila ada versi baru (tanpa auto-download).
 - **Tema mono gelap** dengan skala UI yang bisa diatur.
 

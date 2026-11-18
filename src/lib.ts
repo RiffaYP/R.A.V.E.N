@@ -83,6 +83,11 @@ export function setAccent(hex: string) {
 }
 
 export type ThemePreset = "oled" | "slate" | "violet" | "frosted";
+export type NotchShape = "attached" | "floating" | "glass";
+
+export function setShape(shape: NotchShape) {
+  document.body.dataset.shape = shape;
+}
 
 export function setTheme(theme: ThemePreset) {
   const root = document.documentElement.style;

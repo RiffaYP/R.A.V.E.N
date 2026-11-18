@@ -53,6 +53,7 @@ export interface ShelfItem {
 export type AccentMode = "preset" | "cover";
 export type AccentColor = "white" | "blue" | "purple" | "green" | "orange" | "pink";
 export type ThemePreset = "oled" | "slate" | "violet" | "frosted";
+export type NotchShape = "attached" | "floating" | "glass";
 
 export interface SettingsState {
   scale: number;
@@ -67,6 +68,8 @@ export interface SettingsState {
   hour24: boolean;
   mascot: boolean;
   theme: ThemePreset;
+  shape: NotchShape;
+  glow: boolean;
   displays: DisplayOption[];
 }
 

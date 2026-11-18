@@ -48,6 +48,7 @@ export interface ShelfItem {
 export type AccentMode = "preset" | "cover";
 export type AccentColor = "white" | "blue" | "purple" | "green" | "orange" | "pink";
 export type ThemePreset = "oled" | "slate" | "violet" | "frosted";
+export type NotchShape = "attached" | "floating" | "glass";
 
 export interface SettingsState {
   scale: number;
@@ -62,6 +63,8 @@ export interface SettingsState {
   hour24: boolean;
   mascot: boolean;
   theme: ThemePreset;
+  shape: NotchShape;
+  glow: boolean;
   displays: DisplayOption[];
 }
 
@@ -128,6 +131,16 @@ contextBridge.exposeInMainWorld("raven", {
     const handler = (_e: unknown, theme: ThemePreset) => cb(theme);
     ipcRenderer.on("settings:theme", handler);
     return () => ipcRenderer.removeListener("settings:theme", handler);
+  },
+  onShape: (cb: (shape: NotchShape) => void) => {
+    const handler = (_e: unknown, shape: NotchShape) => cb(shape);
+    ipcRenderer.on("settings:shape", handler);
+    return () => ipcRenderer.removeListener("settings:shape", handler);
+  },
+  onGlow: (cb: (glow: boolean) => void) => {
+    const handler = (_e: unknown, glow: boolean) => cb(glow);
+    ipcRenderer.on("settings:glow", handler);
+    return () => ipcRenderer.removeListener("settings:glow", handler);
   },
   setSettings: (patch: Partial<SettingsState>) =>
     ipcRenderer.invoke("settings:set", patch) as Promise<SettingsState>,

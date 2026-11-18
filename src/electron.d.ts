@@ -6,6 +6,7 @@ import type {
   AccentMode,
   AccentColor,
   ThemePreset,
+  NotchShape,
 } from "./shared";
 
 export type {
@@ -18,6 +19,7 @@ export type {
   AccentMode,
   AccentColor,
   ThemePreset,
+  NotchShape,
   SettingsState,
 } from "./shared";
 
@@ -49,6 +51,8 @@ declare global {
       onHour24: (cb: (hour24: boolean) => void) => () => void;
       onMascot: (cb: (on: boolean) => void) => () => void;
       onTheme: (cb: (theme: ThemePreset) => void) => () => void;
+      onShape: (cb: (shape: NotchShape) => void) => () => void;
+      onGlow: (cb: (glow: boolean) => void) => () => void;
       setSettings: (patch: Partial<SettingsState>) => Promise<SettingsState>;
     };
   }

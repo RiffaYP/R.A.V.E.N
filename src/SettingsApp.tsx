@@ -18,6 +18,12 @@ const THEMES = [
   { value: "frosted", label: "Frosted Glass" },
 ] as const;
 
+const SHAPES = [
+  { value: "attached", label: "Menempel" },
+  { value: "floating", label: "Melayang" },
+  { value: "glass", label: "Kaca" },
+] as const;
+
 export default function SettingsApp() {
   const [settings, setSettings] = useState<SettingsState | null>(null);
 
@@ -168,6 +174,38 @@ export default function SettingsApp() {
         <div className="settings-hint">
           Ubah latar belakang notch. Frosted Glass tembus pandang dengan wallpaper.
         </div>
+      </section>
+
+      <section className="settings-section">
+        <span className="settings-label">Bentuk notch</span>
+        <div className="accent-modes">
+          {SHAPES.map((s) => (
+            <button
+              key={s.value}
+              className={`accent-mode ${settings.shape === s.value ? "on" : ""}`}
+              onClick={() => update({ shape: s.value })}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <div className="settings-hint">
+          Menempel ke tepi atas, melayang sebagai pill, atau kaca tembus pandang.
+        </div>
+      </section>
+
+      <section className="settings-section settings-row">
+        <div>
+          <span className="settings-label">Glow cover</span>
+          <div className="settings-hint">Aura tepi notch mengikuti warna cover lagu.</div>
+        </div>
+        <button
+          className={`settings-toggle ${settings.glow ? "on" : ""}`}
+          onClick={() => update({ glow: !settings.glow })}
+          aria-label="Glow cover"
+        >
+          <span />
+        </button>
       </section>
 
       <section className="settings-section">

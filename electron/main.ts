@@ -355,6 +355,16 @@ function broadcastTheme() {
   win.webContents.send("settings:theme", getSettings().theme);
 }
 
+function broadcastShape() {
+  if (!win || win.isDestroyed()) return;
+  win.webContents.send("settings:shape", getSettings().shape);
+}
+
+function broadcastGlow() {
+  if (!win || win.isDestroyed()) return;
+  win.webContents.send("settings:glow", getSettings().glow);
+}
+
 ipcMain.handle("settings:set", (_e, patch: Record<string, unknown>) => {
   if ("scale" in patch || "monitor" in patch) patch.x = null;
   const s = saveSettings(patch);
@@ -365,6 +375,8 @@ ipcMain.handle("settings:set", (_e, patch: Record<string, unknown>) => {
   if ("hour24" in patch) broadcastHour24();
   if ("mascot" in patch) broadcastMascot();
   if ("theme" in patch) broadcastTheme();
+  if ("shape" in patch) broadcastShape();
+  if ("glow" in patch) broadcastGlow();
   return s;
 });
 
