@@ -17,7 +17,7 @@ export default function ClockPage() {
 
   return (
     <div className="page clock-page has-head">
-      <PageHeader title="Jam & Kalender" />
+      <PageHeader title="Jam & Kalender" icon="calendar" />
       <div className="clock-left">
         <div className="big-time">{hh}:{mm}<span className="sec">:{ss}</span></div>
         <div className="big-date">{DAYS_ID[now.getDay()]}, {now.getDate()} {MONTHS_ID[month]} {year}</div>

@@ -14,15 +14,15 @@ import RavenMascot from "./components/RavenMascot";
 import Icon from "./components/Icon";
 
 const PAGES = [
-  { id: "media", label: "Musik" },
-  { id: "clock", label: "Jam" },
-  { id: "pomodoro", label: "Pomodoro" },
-  { id: "system", label: "Sistem" },
-  { id: "tools", label: "Alat" },
-  { id: "prayer", label: "Sholat" },
-  { id: "water", label: "Water" },
-  { id: "weather", label: "Cuaca" },
-  { id: "translate", label: "Terjemah" },
+  { id: "media", label: "Musik", icon: "music" },
+  { id: "clock", label: "Jam", icon: "calendar" },
+  { id: "pomodoro", label: "Pomodoro", icon: "timer" },
+  { id: "system", label: "Sistem", icon: "cpu" },
+  { id: "tools", label: "Alat", icon: "wrench" },
+  { id: "prayer", label: "Sholat", icon: "prayer" },
+  { id: "water", label: "Water", icon: "droplet" },
+  { id: "weather", label: "Cuaca", icon: "cloud" },
+  { id: "translate", label: "Terjemah", icon: "languages" },
 ] as const;
 
 function checkPomoActive(): boolean {
@@ -313,13 +313,16 @@ export default function App() {
 
             <div className="dots">
               {PAGES.map((p, i) => (
-                <button
-                  key={p.id}
-                  className={`nav-dot ${i === page ? "on" : ""}`}
-                  onClick={() => goTo(i)}
-                  aria-label={p.label}
-                  title={p.label}
-                />
+<button
+                   key={p.id}
+                   className={`nav-dot ${i === page ? "on" : ""}`}
+                   onClick={() => goTo(i)}
+                   aria-label={p.label}
+                   aria-current={i === page ? "page" : undefined}
+                   title={p.label}
+                 >
+                   <Icon name={p.icon} size={14} />
+                 </button>
               ))}
             </div>
             <button className="settings-gear" onClick={() => window.raven.openSettings()} aria-label="Pengaturan" title="Pengaturan"><Icon name="settings" size={14} /></button>

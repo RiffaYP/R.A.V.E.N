@@ -85,6 +85,7 @@ export default function Prayer() {
     <div className="page prayer has-head">
       <PageHeader
         title="Jadwal Sholat"
+        icon="prayer"
         right={
           <select value={city} onChange={(e) => chooseCity(e.target.value)} className="prayer-select">
             {CITY_NAMES.map((c) => <option key={c} value={c}>{c}</option>)}

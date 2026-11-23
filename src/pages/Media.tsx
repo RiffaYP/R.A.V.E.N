@@ -178,7 +178,7 @@ export default function Media({ media }: { media: MediaInfo | null }) {
       {media?.cover && (
         <div className="media-bg" style={{ backgroundImage: `url("${media.cover}")` }} />
       )}
-      <PageHeader title="Musik" sub={media?.isPlaying ? "Memutar" : media ? "Dijeda" : "Tidak ada media"} />
+      <PageHeader title="Musik" icon="music" sub={media?.isPlaying ? "Memutar" : media ? "Dijeda" : "Tidak ada media"} />
       <div className={`art ${media?.cover ? "has-img" : ""}`}>
         {media?.cover ? <img src={media.cover} alt="" /> : <span className="art-icon"><UIIcon name="music" size={24} /></span>}
         <Visualizer progress={progress} playing={!!media?.isPlaying} bars={4} className="eq" />

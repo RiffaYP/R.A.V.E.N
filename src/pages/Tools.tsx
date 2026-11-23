@@ -24,6 +24,7 @@ export default function Tools() {
     <div className="page tools has-head">
       <PageHeader
         title="Alat"
+        icon="wrench"
         right={
           <div className="tools-tabs">
             <button className={`chip ${tab === "todo" ? "on" : ""}`} onClick={() => setTab("todo")}>To-do</button>

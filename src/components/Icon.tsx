@@ -17,7 +17,15 @@ export type IconName =
   | "copy"
   | "pin"
   | "refresh"
-  | "file";
+  | "file"
+  | "timer"
+  | "cpu"
+  | "wrench"
+  | "prayer"
+  | "droplet"
+  | "cloud"
+  | "languages"
+  | "calendar";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   bolt: <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />,
@@ -89,6 +97,31 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M6 3h7l5 5v13H6V3z" />
       <path d="M13 3v5h5" />
+    </>
+  ),
+  timer: (
+    <>
+      <circle cx="12" cy="13" r="7" />
+      <path d="M12 9v4l2.5 1.5M9 3h6M12 3v3" />
+    </>
+  ),
+  cpu: (
+    <>
+      <rect x="7" y="7" width="10" height="10" rx="1" />
+      <path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4" />
+    </>
+  ),
+  wrench: <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.1-2.1 2.3-2.1z" />,
+  prayer: <path d="M8 20v-5M16 20v-5M6 11c0-2 1.3-4 3-4 1.2 0 2.2.8 3 2 .8-1.2 1.8-2 3-2 1.7 0 3 2 3 4M8 15c-2 0-3-1.2-3-3M16 15c2 0 3-1.2 3-3M12 9v11" />,
+  droplet: <path d="M12 3s6 6.2 6 11a6 6 0 0 1-12 0c0-4.8 6-11 6-11z" />,
+  cloud: (
+    <path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9a4.5 4.5 0 0 0 1 9z" />
+  ),
+  languages: <path d="M4 5h8M8 3v2c0 4-2 7-5 9M5 9c1.5 2 3.5 3.5 6 4.5M14 20l4-10 4 10M15.5 17h5" />,
+  calendar: (
+    <>
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M8 3v4M16 3v4M4 10h16" />
     </>
   ),
 };

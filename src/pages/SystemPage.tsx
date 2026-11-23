@@ -16,7 +16,7 @@ export default function SystemPage({ info }: { info: SystemInfo | null }) {
   const s = info;
   return (
     <div className="page sys has-head">
-      <PageHeader title="Sistem" />
+      <PageHeader title="Sistem" icon="cpu" />
       <div className="sys-card">
         <div className="sys-row">
           <span className={`sys-ico ${s?.charging ? "on" : ""}`}><Icon name="bolt" size={13} /></span>

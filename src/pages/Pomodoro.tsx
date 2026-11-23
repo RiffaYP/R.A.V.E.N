@@ -78,6 +78,7 @@ export default function Pomodoro() {
     <div className="page pomo has-head">
       <PageHeader
         title="Pomodoro"
+        icon="timer"
         sub={state.phase === "focus" ? "Fokus" : "Istirahat"}
         right={
           <div className="pomo-tabs">

@@ -18,7 +18,7 @@ export default function Water() {
 
   return (
     <div className="page water has-head">
-      <PageHeader title="Water Reminder" sub={`${count * ML} ml`} />
+      <PageHeader title="Water Reminder" icon="droplet" sub={`${count * ML} ml`} />
 
       <div className="water-main">
         <div className="water-ring">

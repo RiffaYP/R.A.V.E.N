@@ -137,6 +137,7 @@ export default function Weather() {
     <div className="page weather has-head">
       <PageHeader
         title="Cuaca"
+        icon="cloud"
         sub={city}
         right={
           <select value={city} onChange={(e) => chooseCity(e.target.value)} className="prayer-select">

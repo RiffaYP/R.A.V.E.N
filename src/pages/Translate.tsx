@@ -54,6 +54,7 @@ export default function Translate() {
     <div className="page tr has-head">
       <PageHeader
         title="Terjemah"
+        icon="languages"
         right={
           <div className="tr-controls">
             {showLatin && (
