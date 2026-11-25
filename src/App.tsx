@@ -44,7 +44,7 @@ export default function App() {
   const [expanded, setExpanded] = useState(false);
   const [page, setPage] = useState(0);
   const [dir, setDir] = useState(1);
-  const [peekTitle, setPeekTitle] = useState(false);
+  const peekTitle = !!media?.isPlaying && !!media.title;
   const [notice, setNotice] = useState<null | "charging" | "headphone">(null);
   const [noticeDevice, setNoticeDevice] = useState<string>("");
   const [compact, setCompact] = useState(false);
@@ -107,7 +107,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!mascotOn || expanded || hovering || compact || peekTitle) {
+    if (!mascotOn || expanded || hovering || compact || peekTitle || pomoActive || notice) {
       setShowMascot(false);
       return;
     }
@@ -124,7 +124,7 @@ export default function App() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [mascotOn, expanded, hovering, compact, peekTitle]);
+  }, [mascotOn, expanded, hovering, compact, peekTitle, pomoActive, notice]);
 
   useEffect(() => {
     const applyAccent = (mode: "preset" | "cover", color: string, cover: string) => {
@@ -161,20 +161,6 @@ export default function App() {
     }
   }, [media?.cover]);
 
-
-  useEffect(() => {
-    const canPeek = !expanded && !!media?.isPlaying && !!media?.title;
-    if (!canPeek) {
-      setPeekTitle(false);
-      return;
-    }
-    let showing = false;
-    const id = setInterval(() => {
-      showing = !showing;
-      setPeekTitle(showing);
-    }, 6000);
-    return () => clearInterval(id);
-  }, [expanded, media?.isPlaying, media?.title]);
 
   useEffect(() => {
     if (!system) return;
@@ -294,12 +280,15 @@ export default function App() {
             )}
             {!expanded && showMascot ? (
               <RavenMascot active={hovering} />
-            ) : !expanded && peekTitle && media?.title ? (
-              <span className="peek-title">
-                <span className="peek-track">{media.title}{media.artist ? ` · ${media.artist}` : ""}</span>
-              </span>
             ) : (
-              <span className="clock">{time}</span>
+              <>
+                <span className="clock">{time}</span>
+                {!expanded && peekTitle && media?.title && (
+                  <span className="peek-title" title={`${media.title}${media.artist ? ` · ${media.artist}` : ""}`}>
+                    <span className="peek-track">{media.title}{media.artist ? ` · ${media.artist}` : ""}</span>
+                  </span>
+                )}
+              </>
             )}
             {!expanded && !showMascot && media?.isPlaying && (
               <span className="mini-eq" aria-label="Audio visualizer" title={`Memutar: ${media.title}`}>
