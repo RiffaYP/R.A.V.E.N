@@ -11,6 +11,7 @@ import Water from "./pages/Water";
 import Weather from "./pages/Weather";
 import Translate from "./pages/Translate";
 import Icon from "./components/Icon";
+import RavenMascot from "./components/RavenMascot";
 
 const PAGES = [
   { id: "media", label: "Musik", icon: "music" },
@@ -48,6 +49,8 @@ export default function App() {
   const [noticeDevice, setNoticeDevice] = useState<string>("");
   const [compact, setCompact] = useState(false);
   const [hovering, setHovering] = useState(false);
+  const [mascotOn, setMascotOn] = useState(true);
+  const [showMascot, setShowMascot] = useState(false);
   const [glowOn, setGlowOn] = useState(true);
   const [glowColor, setGlowColor] = useState("#ffffff");
   const [pomoActive, setPomoActive] = useState(false);
@@ -84,21 +87,33 @@ export default function App() {
   useEffect(() => {
     window.raven.getSettings().then((s) => {
       setHour24(s.hour24 !== false);
+      setMascotOn(s.mascot !== false);
       setGlowOn(s.glow !== false);
       setTheme(s.theme || "oled");
       setShape(s.shape || "attached");
     });
     const offHour = window.raven.onHour24(setHour24);
+    const offMascot = window.raven.onMascot?.(setMascotOn);
     const offTheme = window.raven.onTheme?.(setTheme);
     const offShape = window.raven.onShape?.(setShape);
     const offGlow = window.raven.onGlow?.(setGlowOn);
     return () => {
       offHour();
+      offMascot?.();
       offTheme?.();
       offShape?.();
       offGlow?.();
     };
   }, []);
+
+  useEffect(() => {
+    if (!mascotOn || expanded || hovering || compact || media?.isPlaying || pomoActive || notice) {
+      setShowMascot(false);
+      return;
+    }
+    const id = window.setTimeout(() => setShowMascot(true), 4000);
+    return () => window.clearTimeout(id);
+  }, [mascotOn, expanded, hovering, compact, media?.isPlaying, pomoActive, notice]);
 
   useEffect(() => {
     const canPeek = !expanded && !!media?.isPlaying && !!media?.title;
@@ -263,16 +278,22 @@ export default function App() {
           )}
 
           <div className={`clock-layer ${expanded ? "at-corner" : ""}`}>
-            {!expanded && (
+            {!expanded && !showMascot && (
               <span className={`dot ${pomoActive ? "pomo-pulse" : hasMedia ? "" : "idle"}`} />
             )}
-            <span className="clock">{time}</span>
-            {!expanded && peekTitle && media?.title && (
-              <span className="peek-title" title={`${media.title}${media.artist ? ` · ${media.artist}` : ""}`}>
-                <span className="peek-track">{media.title}{media.artist ? ` · ${media.artist}` : ""}</span>
-              </span>
+            {!expanded && showMascot ? (
+              <RavenMascot active={hovering} />
+            ) : (
+              <>
+                <span className="clock">{time}</span>
+                {!expanded && peekTitle && media?.title && (
+                  <span className="peek-title" title={`${media.title}${media.artist ? ` · ${media.artist}` : ""}`}>
+                    <span className="peek-track">{media.title}{media.artist ? ` · ${media.artist}` : ""}</span>
+                  </span>
+                )}
+              </>
             )}
-            {!expanded && media?.isPlaying && (
+            {!expanded && !showMascot && media?.isPlaying && (
               <span className="mini-eq" aria-label="Audio visualizer" title={`Memutar: ${media.title}`}>
                 <span /><span /><span />
               </span>
