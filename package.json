@@ -1,6 +1,9 @@
 {
   "name": "raven-tauri",
   "version": "0.1.0",
+  "description": "Desktop notch widget for Windows with media control, widgets, and live activities",
+  "author": "Riffa YP",
+  "homepage": "https://github.com/RiffaYP/R.A.V.E.N",
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {
@@ -28,6 +31,7 @@
   "build": {
     "appId": "app.raven.notch",
     "productName": "Raven",
+    "copyright": "Copyright © 2026 Riffa YP",
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
