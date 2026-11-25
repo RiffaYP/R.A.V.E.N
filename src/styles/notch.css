@@ -64,7 +64,7 @@
   );
   opacity: 0.9;
 }
-.notch.glow.playing .content { position: relative; z-index: 1; }
+.notch.glow.playing .content { z-index: 1; }
 @keyframes glow-breathe {
   0%, 100% {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55),
@@ -111,6 +111,7 @@ body[data-shape="glass"] .notch.open {
 .content {
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: 0 0 var(--r) var(--r);
   overflow: hidden;
 }
