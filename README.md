@@ -15,7 +15,7 @@ Dibangun dengan **Electron + React + TypeScript**.
 
 | Halaman | Isi |
 |---|---|
-| **Musik** | Cover album (iTunes → Deezer), judul/artis, lirik sinkron (LRCLIB → lyrics.ovh) + jeda instrumen & marquee baris panjang, progress + seek (klik/geser), kontrol prev/play/next, background blur dari cover |
+| **Musik** | Cover album (iTunes → Deezer), judul/artis, lirik sinkron (LRCLIB → lyrics.ovh) + indikator jeda instrumen konservatif (gap ≥10 detik; tunggu 4,5 detik) & marquee baris panjang, progress + seek (klik/geser), kontrol prev/play/next, background blur dari cover |
 | **Jam & Kalender** | Jam besar + detik, tanggal Indonesia, kalender bulanan |
 | **Pomodoro** | Ring progres, mode Fokus/Istirahat, durasi atur, jalan lintas halaman |
 | **Sistem** | Baterai & health, WiFi, Bluetooth (status + baterai GATT), Caps Lock, volume, kecerahan |
@@ -26,15 +26,15 @@ Dibangun dengan **Electron + React + TypeScript**.
 | **Terjemah** | Terjemahan via Google Gemini, 9 bahasa, toggle transliterasi latin |
 
 ### Perilaku global
-- **Closed state hidup (Dynamic Island style)** — notch tertutup menampilkan breathing pulse saat Pomodoro aktif, dan mini audio visualizer 3 batang saat musik memutar.
+- **Closed state hidup (Dynamic Island style)** — notch tertutup menampilkan breathing pulse saat Pomodoro aktif, mini audio visualizer 3 batang saat musik memutar, dan mascot saat idle.
 - **Ringan di latar** — data diambil lewat worker PowerShell persisten (satu proses), bukan
   spawn proses baru tiap poll; lirik tetap sinkron ~500ms.
-- **Idle peek** — notch tertutup bergantian jam ↔ judul lagu.
-- **Raven mascot** — mata SVG ber-glow saat idle (bisa dimatikan).
+- **Idle peek** — saat musik diputar, judul lagu dan jam bergantian tiap 6 detik; jam tetap selalu terlihat saat notch terbuka.
+- **Raven mascot** — mata SVG ber-glow muncul setelah 4 detik saat idle; tersembunyi saat musik, Pomodoro, notifikasi, notch terbuka, atau compact mode. Bisa dimatikan di Pengaturan.
 - **Notifikasi transient** — melebar saat charger dicolok / headphone terhubung.
 - **Auto-compact** — notch mengecil jadi strip mini saat ada fullscreen sungguhan.
 - **Warna aksen** — preset atau mengikuti warna dominan cover album.
-- **Glow cover** — aura tepi notch mengikuti aksen/cover, breathe halus hanya saat musik memutar (bisa dimatikan di Pengaturan).
+- **Glow cover** — aura statis di tepi notch mengikuti aksen/cover saat musik memutar (bisa dimatikan di Pengaturan).
 - **Bentuk notch** — menempel ke tepi atas, melayang (pill), atau kaca translusen (tint + blur, bukan frosted sejati).
 - **Visualizer** — badge bar di cover + strip di bawah artis, bergerak mengikuti posisi lagu.
 - **Update check** — cek rilis GitHub sekali saat start; notifikasi bila ada versi baru (tanpa auto-download).
