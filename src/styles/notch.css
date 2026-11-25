@@ -47,7 +47,9 @@
    bawaan (tipis) supaya tidak muncul garis terang di tepi notch. */
 .notch.glow.playing {
   border-color: color-mix(in srgb, var(--glow, var(--accent, #fff)) 20%, var(--notch-border, transparent));
-  animation: glow-breathe 3.6s ease-in-out infinite;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55),
+    0 0 0 1px color-mix(in srgb, var(--glow, var(--accent, #fff)) 18%, transparent),
+    0 5px 22px -2px color-mix(in srgb, var(--glow, var(--accent, #fff)) 22%, transparent);
 }
 /* ::before paints under .content (later sibling) so the tint never covers UI */
 .notch.glow.playing::before {
@@ -65,18 +67,6 @@
   opacity: 0.9;
 }
 .notch.glow.playing .content { z-index: 1; }
-@keyframes glow-breathe {
-  0%, 100% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55),
-      0 0 0 1px color-mix(in srgb, var(--glow, var(--accent, #fff)) 14%, transparent),
-      0 4px 18px -2px color-mix(in srgb, var(--glow, var(--accent, #fff)) 16%, transparent);
-  }
-  50% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55),
-      0 0 0 1px color-mix(in srgb, var(--glow, var(--accent, #fff)) 26%, transparent),
-      0 6px 26px -2px color-mix(in srgb, var(--glow, var(--accent, #fff)) 28%, transparent);
-  }
-}
 
 /* ===== notch shape variants =====
    attached: menempel ke tepi atas layar (default).
