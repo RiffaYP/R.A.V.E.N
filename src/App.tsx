@@ -10,7 +10,6 @@ import Prayer from "./pages/Prayer";
 import Water from "./pages/Water";
 import Weather from "./pages/Weather";
 import Translate from "./pages/Translate";
-import RavenMascot from "./components/RavenMascot";
 import Icon from "./components/Icon";
 
 const PAGES = [
@@ -44,15 +43,13 @@ export default function App() {
   const [expanded, setExpanded] = useState(false);
   const [page, setPage] = useState(0);
   const [dir, setDir] = useState(1);
-  const peekTitle = !!media?.isPlaying && !!media.title;
+  const [peekTitle, setPeekTitle] = useState(false);
   const [notice, setNotice] = useState<null | "charging" | "headphone">(null);
   const [noticeDevice, setNoticeDevice] = useState<string>("");
   const [compact, setCompact] = useState(false);
   const [hovering, setHovering] = useState(false);
-  const [mascotOn, setMascotOn] = useState(true);
   const [glowOn, setGlowOn] = useState(true);
   const [glowColor, setGlowColor] = useState("#ffffff");
-  const [showMascot, setShowMascot] = useState(false);
   const [pomoActive, setPomoActive] = useState(false);
   const accentRef = useRef<{ mode: "preset" | "cover"; color: string }>({ mode: "preset", color: "white" });
   const prevSystem = useRef<SystemInfo | null>(null);
@@ -87,19 +84,16 @@ export default function App() {
   useEffect(() => {
     window.raven.getSettings().then((s) => {
       setHour24(s.hour24 !== false);
-      setMascotOn(s.mascot !== false);
       setGlowOn(s.glow !== false);
       setTheme(s.theme || "oled");
       setShape(s.shape || "attached");
     });
     const offHour = window.raven.onHour24(setHour24);
-    const offMascot = window.raven.onMascot?.(setMascotOn);
     const offTheme = window.raven.onTheme?.(setTheme);
     const offShape = window.raven.onShape?.(setShape);
     const offGlow = window.raven.onGlow?.(setGlowOn);
     return () => {
       offHour();
-      offMascot?.();
       offTheme?.();
       offShape?.();
       offGlow?.();
@@ -107,24 +101,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!mascotOn || expanded || hovering || compact || peekTitle || pomoActive || notice) {
-      setShowMascot(false);
+    const canPeek = !expanded && !!media?.isPlaying && !!media?.title;
+    if (!canPeek) {
+      setPeekTitle(false);
       return;
     }
-    let cancelled = false;
-    let timer: number;
-    const cycle = (phase: "clock" | "mascot") => {
-      if (cancelled) return;
-      setShowMascot(phase === "mascot");
-      const dur = phase === "mascot" ? 6000 : 8000;
-      timer = window.setTimeout(() => cycle(phase === "mascot" ? "clock" : "mascot"), dur);
-    };
-    timer = window.setTimeout(() => cycle("mascot"), 4000);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [mascotOn, expanded, hovering, compact, peekTitle, pomoActive, notice]);
+    let showing = false;
+    const id = window.setInterval(() => {
+      showing = !showing;
+      setPeekTitle(showing);
+    }, 6000);
+    return () => window.clearInterval(id);
+  }, [expanded, media?.isPlaying, media?.title]);
 
   useEffect(() => {
     const applyAccent = (mode: "preset" | "cover", color: string, cover: string) => {
@@ -275,22 +263,16 @@ export default function App() {
           )}
 
           <div className={`clock-layer ${expanded ? "at-corner" : ""}`}>
-            {!expanded && !showMascot && (
+            {!expanded && (
               <span className={`dot ${pomoActive ? "pomo-pulse" : hasMedia ? "" : "idle"}`} />
             )}
-            {!expanded && showMascot ? (
-              <RavenMascot active={hovering} />
-            ) : (
-              <>
-                <span className="clock">{time}</span>
-                {!expanded && peekTitle && media?.title && (
-                  <span className="peek-title" title={`${media.title}${media.artist ? ` · ${media.artist}` : ""}`}>
-                    <span className="peek-track">{media.title}{media.artist ? ` · ${media.artist}` : ""}</span>
-                  </span>
-                )}
-              </>
+            <span className="clock">{time}</span>
+            {!expanded && peekTitle && media?.title && (
+              <span className="peek-title" title={`${media.title}${media.artist ? ` · ${media.artist}` : ""}`}>
+                <span className="peek-track">{media.title}{media.artist ? ` · ${media.artist}` : ""}</span>
+              </span>
             )}
-            {!expanded && !showMascot && media?.isPlaying && (
+            {!expanded && media?.isPlaying && (
               <span className="mini-eq" aria-label="Audio visualizer" title={`Memutar: ${media.title}`}>
                 <span /><span /><span />
               </span>
