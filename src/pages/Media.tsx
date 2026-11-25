@@ -19,7 +19,7 @@ function isInstrumentalBreak(
   const adj = livePos + 100 + offset;
   if (activeIndex === -1) {
     const firstT = lines[0].t;
-    return firstT >= 6000 && adj >= 1000 && adj < firstT - 1500;
+    return firstT >= 10000 && adj >= 1000 && adj < firstT - 1500;
   }
   const currT = lines[activeIndex].t;
   const nextT =
@@ -29,7 +29,7 @@ function isInstrumentalBreak(
       ? duration
       : currT;
   const gap = nextT - currT;
-  return gap >= 6000 && adj >= currT + 2500 && adj < nextT - 1500;
+  return gap >= 10000 && adj >= currT + 4500 && adj < nextT - 2000;
 }
 
 function LyricRow({ text, active }: { text: string; active: boolean }) {
