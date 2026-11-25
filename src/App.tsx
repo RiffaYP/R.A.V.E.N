@@ -60,6 +60,7 @@ export default function App() {
   const timer = useRef<number | undefined>(undefined);
   const notchRef = useRef<HTMLDivElement>(null);
   const ignoreRef = useRef<boolean | null>(null);
+  const pointerRef = useRef({ x: -1, y: -1 });
 
   useEffect(() => window.raven.onMedia(setMedia), []);
   useEffect(() => window.raven.onSystem(setSystem), []);
@@ -198,6 +199,7 @@ export default function App() {
 
   useEffect(() => {
     const onMove = (e: globalThis.MouseEvent) => {
+      pointerRef.current = { x: e.clientX, y: e.clientY };
       const el = notchRef.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
@@ -208,9 +210,24 @@ export default function App() {
         window.raven.clickThrough(!inside);
       }
     };
+    const checkOutside = () => {
+      if (!expanded) return;
+      const el = notchRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const { x, y } = pointerRef.current;
+      if (x < r.left || x > r.right || y < r.top || y > r.bottom) collapse();
+    };
+    const onBlur = () => collapse();
     window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
+    window.addEventListener("blur", onBlur);
+    const id = window.setInterval(checkOutside, 120);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("blur", onBlur);
+      window.clearInterval(id);
+    };
+  }, [expanded]);
 
   const expand = () => {
     window.clearTimeout(timer.current);
